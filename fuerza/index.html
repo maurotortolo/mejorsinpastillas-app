@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#25348F">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi fuerza">
+<title>Mi fuerza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: app de una pantalla, encabezado azul marino, contenido en tarjetas por patrón de movimiento, barra de pestañas abajo. */
+:root{
+  --navy:#25348F; --green:#2F6B5B; --mint:#D6EFE6; --sand:#EFE9DC;
+  --bg:#F5F6FA; --card:#FFFFFF; --ink:#1C2033; --muted:#5D6478; --line:#DDE1EC;
+  --good:#2F6B5B; --warn:#9A6A12;
+  --font:"Carlito", Calibri, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --navy:#8E9CF0; --green:#7CC9AE; --mint:#1F3A33; --sand:#2B2820;
+    --bg:#11131C; --card:#1A1D2A; --ink:#E9EBF3; --muted:#A3A9BD; --line:#2C3042;
+    --good:#7CC9AE; --warn:#E3B45A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#8E9CF0; --green:#7CC9AE; --mint:#1F3A33; --sand:#2B2820;
+  --bg:#11131C; --card:#1A1D2A; --ink:#E9EBF3; --muted:#A3A9BD; --line:#2C3042;
+  --good:#7CC9AE; --warn:#E3B45A; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.app{display:flex;flex-direction:column;height:100%;max-width:560px;margin:0 auto}
+header{background:#25348F;color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px}
+header .brand{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+header h1{margin:2px 0 0;font-size:26px;text-wrap:balance}
+header p{margin:4px 0 0;font-size:14px;opacity:.85}
+main{flex:1;overflow-y:auto;padding:16px 16px 24px;display:flex;flex-direction:column;gap:16px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;border:0;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--muted)}
+nav button svg{width:24px;height:24px}
+nav button[aria-current="page"]{color:var(--navy);font-weight:700}
+.banner{background:var(--sand);border-radius:12px;padding:12px 14px;font-size:15px;display:flex;flex-direction:column;gap:8px}
+.banner b{color:var(--ink)}
+.group h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin:0 0 8px}
+.list{display:flex;flex-direction:column;gap:8px}
+.ex{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;width:100%}
+.ex .txt{flex:1;min-width:0}
+.ex .name{font-weight:700;font-size:18px}
+.ex .meta{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.ex .plus{flex:none;width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:26px;line-height:1}
+:root[data-theme="dark"] .ex .plus{color:#11131C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ex .plus{color:#11131C}}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--mint);color:var(--good);margin-left:6px;vertical-align:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card h3{margin:0 0 8px;font-size:18px}
+.muted{color:var(--muted);font-size:14px}
+select,input[type=text],input[type=number],input[type=date],textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+label{font-size:14px;color:var(--muted);display:block;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:16px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted);font-weight:700}
+td.del{text-align:right}
+.icon-btn{background:none;border:0;color:var(--muted);padding:4px 6px;font-size:14px;text-decoration:underline}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:var(--navy);color:#fff}
+:root[data-theme="dark"] .btn{color:#11131C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#11131C}}
+.btn.sec{background:var(--mint);color:var(--good)}
+.btn.ghost{background:none;color:var(--navy);border:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > *{flex:1}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--green);border-radius:6px}
+.chart svg{width:100%;height:auto;display:block}
+/* hoja inferior */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,12,25,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.sheet-bg.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;max-height:92%;overflow-y:auto}
+.sheet h3{margin:0;font-size:22px}
+.stepper{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center}
+.stepper button{height:52px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:24px;font-weight:700}
+.stepper input{text-align:center;font-size:28px;font-weight:700;height:52px;font-variant-numeric:tabular-nums}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-size:14px}
+.hint{background:var(--mint);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 0 8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="brand" href="../" style="color:#fff;text-decoration:none">‹ Mejor sin pastillas</a>
+    <h1 id="title">Mi fuerza</h1>
+    <p id="subtitle">Anotá tu serie más pesada de cada ejercicio.</p>
+  </header>
+  <main id="main"></main>
+  <nav aria-label="Secciones">
+    <button data-view="registrar" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Registrar</button>
+    <button data-view="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M5 15l4-4 4 3 6-7"/></svg>Progreso</button>
+    <button data-view="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Metas</button>
+    <button data-view="mas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Más</button>
+  </nav>
+</div>
+
+<div class="sheet-bg" id="sheetBg" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet" id="sheet"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="msp_fuerza_v1";
+var PATTERNS=[
+  {id:"tp",name:"Tracción de piernas",ex:["pm","pm2"]},
+  {id:"ep",name:"Empuje de piernas",ex:["sq","sq2"]},
+  {id:"eb",name:"Empuje de brazos",ex:["pp","pi"]},
+  {id:"tb",name:"Tracción de brazos",ex:["remo","dom"]},
+  {id:"ac",name:"Acarreo",ex:["gr"]}
+];
+var BASE_EX={
+  pm:{name:"Peso muerto"}, pm2:{name:"Otro peso muerto",variant:true},
+  sq:{name:"Sentadilla con barra atrás"}, sq2:{name:"Otra sentadilla",variant:true},
+  pp:{name:"Press plano"}, pi:{name:"Press inclinado"},
+  remo:{name:"Remo",variant:true}, dom:{name:"Dominadas",bw:true},
+  gr:{name:"Caminata de granjero",unit:"m"}
+};
+var MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function shiftDate(days){var d=new Date();d.setDate(d.getDate()+days);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function fmtDate(s){var p=s.split("-");return p[2]+"/"+p[1];}
+function monthKey(s){return s.slice(0,7);}
+function monthLabel(k){var p=k.split("-");return MESES[+p[1]-1]+" "+p[0].slice(2);}
+function num(x){return (Math.round(x*10)/10).toString().replace(".",",");}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+function demo(){
+  var logs=[],id=1;
+  function add(ex,daysAgo,kg,n){logs.push({id:id++,ex:ex,date:shiftDate(-daysAgo),kg:kg,n:n});}
+  var plan={pm:[50,55,60,62.5],sq:[40,45,50,52.5],pp:[30,32.5,35,37.5],remo:[20,22,24,26],dom:[0,0,2.5,5],gr:[16,18,20,22]};
+  var reps={pm:8,sq:8,pp:8,remo:10,dom:5,gr:40};
+  Object.keys(plan).forEach(function(ex){plan[ex].forEach(function(kg,i){add(ex,(3-i)*30+3,kg,reps[ex]+(i===3?1:0));});});
+  return {v:1,demo:true,prof:"",plazo:"6",names:{remo:"a un brazo",pm2:"",sq2:""},logs:logs,nextId:id,
+    goals:{tp:{ex:"pm",kg:80,n:8},ep:{ex:"sq",kg:70,n:8},eb:{ex:"pp",kg:45,n:8},tb:{ex:"remo",kg:30,n:10}}};
+}
+function blank(){return {v:1,demo:false,prof:"",plazo:"",names:{remo:"",pm2:"",sq2:""},logs:[],nextId:1,goals:{}};}
+var S;
+var APP_SCHEMA=1;
+function migrate(d){if(!d||typeof d!=="object")return blank();if(!d.v)d.v=1;/* futuras versiones: convertir aquí, nunca borrar campos */ if(!d.names)d.names={remo:"",pm2:"",sq2:""};if(!d.goals)d.goals={};if(!d.logs)d.logs=[];if(!d.nextId)d.nextId=d.logs.reduce(function(m,l){return Math.max(m,l.id+1);},1);return d;}
+try{var raw=localStorage.getItem(KEY);S=raw?migrate(JSON.parse(raw)):blank();}catch(e){S=blank();}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+var storageOK=true;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));storageOK=true;}catch(e){storageOK=false;}}
+
+function exName(id){var b=BASE_EX[id];if(b.variant&&S.names[id]){return (id==="remo"?"Remo ":"")+S.names[id];}return b.name;}
+function unit(id){return BASE_EX[id].unit==="m"?"m":"rep";}
+function logsOf(id){return S.logs.filter(function(l){return l.ex===id;}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.id-b.id;});}
+function better(a,b){return !b||a.kg>b.kg||(a.kg===b.kg&&a.n>b.n);}
+function best(list){var r=null;list.forEach(function(l){if(better(l,r))r=l;});return r;}
+function monthlyBest(id){var m={};logsOf(id).forEach(function(l){var k=monthKey(l.date);if(better(l,m[k]))m[k]=l;});return Object.keys(m).sort().map(function(k){return {k:k,l:m[k]};});}
+function markTxt(l,id){return (l.kg?num(l.kg)+" kg":(BASE_EX[id].bw?"peso corporal":"0 kg"))+" × "+l.n+" "+unit(id);}
+
+var toastT;
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2200);}
+
+var view="registrar", progEx="pm";
+var main=document.getElementById("main");
+
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+function standalone(){return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;}
+function topNotices(){
+  var h="";
+  if(isIOS()&&!standalone()&&!S.hideIOS){h+='<div class="banner"><div><b>Instalala en tu iPhone.</b> Tocá el botón Compartir de Safari y elegí <b>Agregar a pantalla de inicio</b>. Así la abrís como una app y tus registros quedan guardados. Si no la instalás, el iPhone puede borrarlos cuando pasan unos días sin usarla.</div><div><button class="btn ghost" id="hideIOS">Entendido</button></div></div>';}
+  var realLogs=S.demo?0:S.logs.length;
+  if(realLogs>=5){var lb=S.lastBackup?new Date(S.lastBackup):null;var days=lb?(Date.now()-lb.getTime())/864e5:999;if(days>30)h+='<div class="banner"><div><b>Hacé una copia de seguridad.</b> '+(lb?"Pasó más de un mes desde la última.":"Todavía no hiciste ninguna.")+' Si cambiás de teléfono, te va a permitir recuperar tus registros.</div><div><button class="btn" id="goBackup">Hacer copia ahora</button></div></div>';}
+  return h;
+}
+function demoBanner(){
+  if(!S.demo){ if(!S.logs.length) return '<div class="banner"><div><b>¡Bienvenido!</b> Tocá un ejercicio para anotar tu primera serie. ¿Querés ver cómo se ve la app después de unos meses?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>'; return "";}
+  return '<div class="banner"><div><b>Estás viendo un ejemplo.</b> Así se ve la app después de unos meses de entrenamiento. Cuando anotes tu primera serie real, el ejemplo se borra solo.</div><div><button class="btn" id="startFresh">Salir del ejemplo</button></div></div>';
+}
+
+function renderRegistrar(){
+  var thisMonth=monthKey(today());
+  var h=topNotices()+demoBanner();
+  PATTERNS.forEach(function(p){
+    h+='<section class="group"><h2>'+p.name+'</h2><div class="list">';
+    p.ex.forEach(function(id){
+      var ls=logsOf(id), last=ls[ls.length-1];
+      var bm=best(ls.filter(function(l){return monthKey(l.date)===thisMonth;}));
+      var allBest=best(ls);
+      var meta=last?("Última: "+markTxt(last,id)+" · "+fmtDate(last.date)):"Todavía sin registros";
+      var chip=(last&&allBest===last&&ls.length>1)?'<span class="chip">Récord</span>':"";
+      var month=bm?'<div class="meta">Mejor de este mes: '+markTxt(bm,id)+"</div>":"";
+      h+='<button class="ex" data-log="'+id+'"><span class="txt"><span class="name">'+esc(exName(id))+chip+'</span><div class="meta">'+meta+"</div>"+month+'</span><span class="plus" aria-hidden="true">+</span><span class="sr" style="position:absolute;left:-9999px">Registrar '+esc(exName(id))+"</span></button>";
+    });
+    h+="</div></section>";
+  });
+  h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
+  main.innerHTML=h;
+}
+
+function chartSVG(id){
+  var mb=monthlyBest(id);
+  if(mb.length<2)return '<p class="muted">El gráfico aparece cuando tengas registros en al menos dos meses distintos.</p>';
+  var W=320,H=170,pl=36,pr=22,pt=16,pb=28;
+  var vals=mb.map(function(x){return x.l.kg;});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  if(mx===mn){mx=mx+5;mn=Math.max(0,mn-5);}
+  var pad=(mx-mn)*0.15;mn=Math.max(0,mn-pad);mx=mx+pad;
+  var step=Math.pow(10,Math.floor(Math.log10((mx-mn)/3)));
+  [1,2,2.5,5,10].some(function(f){if((mx-mn)/(step*f)<=4){step=step*f;return true;}});
+  mn=Math.floor(mn/step)*step; mx=Math.ceil(mx/step)*step;
+  function x(i){return pl+(W-pl-pr)*(mb.length===1?0.5:i/(mb.length-1));}
+  function y(v){return pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));}
+  var g="";
+  for(var v=mn;v<=mx+1e-9;v+=step){g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+num(v)+'</text>';}
+  var pts=mb.map(function(m,i){return x(i)+","+y(m.l.kg);}).join(" ");
+  var area="M"+x(0)+","+y(mn)+" L"+pts.split(" ").join(" L")+" L"+x(mb.length-1)+","+y(mn)+" Z";
+  var dots=mb.map(function(m,i){var last=i===mb.length-1;return '<circle cx="'+x(i)+'" cy="'+y(m.l.kg)+'" r="'+(last?5:3.5)+'" fill="'+(last?"var(--green)":"var(--card)")+'" stroke="var(--green)" stroke-width="2"/><text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+monthLabel(m.k)+"</text>";}).join("");
+  var lastM=mb[mb.length-1];
+  var lbl='<text x="'+Math.min(x(mb.length-1),W-pr-2)+'" y="'+(y(lastM.l.kg)-10)+'" text-anchor="end" font-size="12" font-weight="700" fill="var(--green)">'+num(lastM.l.kg)+' kg</text>';
+  return '<div class="chart"><svg viewBox="0 0 '+W+" "+H+'" role="img" aria-label="Mejor carga de cada mes en kilos">'+g+'<path d="'+area+'" fill="var(--mint)" opacity=".7"/><polyline points="'+pts+'" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>'+dots+lbl+"</svg></div>";
+}
+
+function renderProgreso(){
+  var opts="";
+  PATTERNS.forEach(function(p){opts+='<optgroup label="'+p.name+'">';p.ex.forEach(function(id){opts+='<option value="'+id+'"'+(id===progEx?" selected":"")+">"+esc(exName(id))+"</option>";});opts+="</optgroup>";});
+  var mb=monthlyBest(progEx), ls=logsOf(progEx).slice().reverse();
+  var first=mb[0], last=mb[mb.length-1];
+  var summary="";
+  if(first&&last&&mb.length>1){var diff=last.l.kg-first.l.kg;summary='<p style="margin:0 0 8px"><b>'+(diff>=0?"+":"")+num(diff)+" kg</b> desde "+monthLabel(first.k)+".</p>";}
+  var h='<div class="card"><label for="exSel">Ejercicio</label><select id="exSel">'+opts+"</select></div>";
+  h+='<div class="card"><h3>Mejor marca de cada mes</h3>'+summary+chartSVG(progEx);
+  if(mb.length){h+='<table><thead><tr><th>Mes</th><th>Mejor serie</th></tr></thead><tbody>'+mb.slice().reverse().map(function(m){return "<tr><td>"+monthLabel(m.k)+"</td><td>"+markTxt(m.l,progEx)+"</td></tr>";}).join("")+"</tbody></table>";}
+  h+="</div>";
+  h+='<div class="card"><h3>Todos los registros</h3>';
+  if(!ls.length)h+='<p class="muted">Todavía no registraste este ejercicio.</p>';
+  else h+="<table><thead><tr><th>Fecha</th><th>Serie</th><th></th></tr></thead><tbody>"+ls.map(function(l){return "<tr><td>"+fmtDate(l.date)+"/"+l.date.slice(2,4)+"</td><td>"+markTxt(l,progEx)+'</td><td class="del"><button class="icon-btn" data-del="'+l.id+'">Borrar</button></td></tr>';}).join("")+"</tbody></table>";
+  h+="</div>";
+  main.innerHTML=h;
+  document.getElementById("exSel").onchange=function(e){progEx=e.target.value;render();};
+}
+
+function renderMetas(){
+  var h="";
+  h+='<div class="card"><h3>¿Cuánto podés progresar?</h3><p class="muted" style="margin:0 0 10px">Completalo con tu entrenador o entrenadora y ajustalo siempre a tu condición del momento. La meta es lograr esas marcas terminando cada serie con una o dos repeticiones en reserva, es decir, sintiendo que podrías haber hecho una o dos más.</p><label for="plazo">Si cumplo con el plan, en cuántos meses podría lograrlo</label><input id="plazo" type="number" inputmode="numeric" min="1" max="36" value="'+esc(S.plazo||"")+'" placeholder="Por ejemplo, 6"></div>';
+  PATTERNS.filter(function(p){return p.id!=="ac";}).forEach(function(p){
+    var g=S.goals[p.id]||{ex:p.ex[0],kg:"",n:""};
+    var cur=best(logsOf(g.ex));
+    var pct=(cur&&g.kg)?Math.max(0,Math.min(100,Math.round(cur.kg/g.kg*100))):0;
+    var opts=p.ex.map(function(id){return '<option value="'+id+'"'+(id===g.ex?" selected":"")+">"+esc(exName(id))+"</option>";}).join("");
+    h+='<div class="card" data-goal="'+p.id+'"><h3>'+p.name+'</h3><div class="row"><div><label for="ge_'+p.id+'">Ejercicio</label><select id="ge_'+p.id+'" data-f="ex">'+opts+'</select></div></div><div class="row" style="margin-top:8px"><div><label for="gk_'+p.id+'">Meta (kg)</label><input id="gk_'+p.id+'" data-f="kg" type="number" inputmode="decimal" step="0.5" value="'+(g.kg===""?"":g.kg)+'"></div><div><label for="gn_'+p.id+'">Repeticiones</label><input id="gn_'+p.id+'" data-f="n" type="number" inputmode="numeric" value="'+(g.n===""?"":g.n)+'"></div></div>';
+    if(g.kg){h+='<div style="margin-top:12px"><div class="muted" style="margin-bottom:6px">Hoy: '+(cur?markTxt(cur,g.ex):"sin registros")+" · Meta: "+num(+g.kg)+" kg × "+(g.n||"?")+" rep</div><div class=\"bar\" role=\"progressbar\" aria-valuenow=\""+pct+"\" aria-valuemin=\"0\" aria-valuemax=\"100\"><i style=\"width:"+pct+"%\"></i></div><div class=\"muted\" style=\"margin-top:4px\">"+pct+" % del camino en kilos</div></div>";}
+    h+="</div>";
+  });
+  main.innerHTML=h;
+  document.getElementById("plazo").onchange=function(e){S.plazo=e.target.value;save();};
+  main.querySelectorAll("[data-goal]").forEach(function(card){
+    card.querySelectorAll("[data-f]").forEach(function(inp){
+      inp.onchange=function(){var pid=card.getAttribute("data-goal");var g=S.goals[pid]||{ex:PATTERNS.filter(function(p){return p.id===pid;})[0].ex[0],kg:"",n:""};var f=inp.getAttribute("data-f");g[f]=f==="ex"?inp.value:(inp.value===""?"":+inp.value);S.goals[pid]=g;save();render();};
+    });
+  });
+}
+
+function renderMas(){
+  var h='<div class="card"><h3>Tus datos</h3><label for="prof">Profesional a cargo del plan</label><input id="prof" type="text" value="'+esc(S.prof||"")+'" placeholder="Nombre de tu entrenador o entrenadora"></div>';
+  h+='<div class="card"><h3>Nombres de tus variantes</h3><p class="muted" style="margin:0 0 10px">Por ejemplo: peso muerto rumano, sentadilla búlgara, remo a un brazo, remo Pendlay o remo con apoyo en banco (seal row).</p>'+
+    [["pm2","Otro peso muerto"],["sq2","Otra sentadilla"],["remo","Remo"]].map(function(a){return '<label for="nm_'+a[0]+'">'+a[1]+'</label><input id="nm_'+a[0]+'" data-name="'+a[0]+'" type="text" value="'+esc(S.names[a[0]]||"")+'" style="margin-bottom:10px">';}).join("")+"</div>";
+  h+='<div class="card"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px">Tus registros se guardan solo en este teléfono. Si cambiás de teléfono o borrás los datos del navegador, se pierden. Una vez por mes, guardá una copia de seguridad, por ejemplo mandándotela por WhatsApp o guardándola en Drive.</p><div class="row"><button class="btn" id="bkFile">Guardar copia de seguridad</button></div><div class="row" style="margin-top:8px"><button class="btn sec" id="bkCopy">Copiar como texto</button></div><label for="bkUp" style="margin-top:12px">Para recuperar tus datos, elegí el archivo de tu copia</label><input id="bkUp" type="file" accept=".json,application/json,text/plain"><label for="bkIn" style="margin-top:12px">O pegá acá la copia en texto</label><textarea id="bkIn" rows="3"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="bkLoad">Recuperar datos</button></div></div>';
+  h+='<div class="card"><h3>Antes de empezar</h3><p class="muted" style="margin:0">Esta app es una ayuda para registrar tu entrenamiento y no reemplaza la indicación de tu médico ni de tu entrenador. Si tenés una lesión, dolor en el pecho, falta de aire o mareos al entrenar, pará y consultá.</p></div>';
+  h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros y metas de este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div>';
+  h+='<footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
+  main.innerHTML=h;
+  document.getElementById("prof").onchange=function(e){S.prof=e.target.value;save();toast("Guardado");};
+  main.querySelectorAll("[data-name]").forEach(function(i){i.onchange=function(){S.names[i.getAttribute("data-name")]=i.value.trim();save();toast("Guardado");};});
+  function backupDone(){S.lastBackup=new Date().toISOString();save();}
+  function restoreObj(d){d=migrate(d);confirmSheet("¿Reemplazar tus datos actuales por los de la copia de seguridad?","Recuperar",function(){S=d;S.demo=false;save();render();toast("Datos recuperados");});}
+  document.getElementById("bkFile").onclick=function(){
+    var data=JSON.stringify({app:"msp-fuerza",fecha:today(),datos:S});
+    var name="mi-fuerza-copia-"+today()+".json";
+    try{var file=new File([data],name,{type:"application/json"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · Mi fuerza"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}
+    }catch(e){}
+    try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();backupDone();toast("Copia descargada");}catch(e){toast("No se pudo guardar el archivo. Probá con Copiar como texto.");}
+  };
+  document.getElementById("bkUp").onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);var d=o.datos||o;if(!d.logs)throw 0;restoreObj(d);}catch(err){toast("Ese archivo no es una copia de seguridad válida.");}};r.readAsText(f);};
+  document.getElementById("bkCopy").onclick=function(){
+    var txt="MSPFUERZA:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+    try{navigator.clipboard.writeText(txt).then(function(){backupDone();toast("Copia copiada: pegala en un chat o una nota");},function(){fallbackCopy(txt);});}catch(e){fallbackCopy(txt);}
+  };
+  document.getElementById("bkLoad").onclick=function(){
+    var v=document.getElementById("bkIn").value.trim();
+    try{if(v.indexOf("MSPFUERZA:")!==0)throw 0;var d=JSON.parse(decodeURIComponent(escape(atob(v.slice(10)))));if(!d.logs)throw 0;
+      restoreObj(d);
+    }catch(e){toast("Esa copia de seguridad no es válida. Revisá que la hayas pegado completa.");}
+  };
+  document.getElementById("wipe").onclick=function(){confirmSheet("¿Seguro que querés borrar todos tus registros y metas? No se puede deshacer.","Borrar todo",function(){S=blank();save();render();toast("Datos borrados");});};
+}
+function fallbackCopy(txt){var b=document.getElementById("bkIn");b.value=txt;b.select();toast("Seleccioné la copia en el recuadro: copiala a mano");}
+
+function render(){
+  document.querySelectorAll("nav button").forEach(function(b){if(b.getAttribute("data-view")===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+  var sub={registrar:"Anotá tu serie más pesada de cada ejercicio.",progreso:"Mirá cómo crece tu fuerza mes a mes.",metas:"Tus marcas objetivo, según tu plan.",mas:"Ajustes y copia de seguridad."}[view];
+  document.getElementById("subtitle").textContent=sub;
+  if(view==="registrar")renderRegistrar();else if(view==="progreso")renderProgreso();else if(view==="metas")renderMetas();else renderMas();
+  var sf=document.getElementById("startFresh");
+  if(sf)sf.onclick=function(){S=blank();save();view="registrar";render();};
+  var sd=document.getElementById("seeDemo");if(sd)sd.onclick=function(){S=demo();S.lastBackup=null;save();render();};
+  var hi=document.getElementById("hideIOS");if(hi)hi.onclick=function(){S.hideIOS=true;save();render();};
+  var gb=document.getElementById("goBackup");if(gb)gb.onclick=function(){view="mas";render();};
+  main.scrollTop=0;
+}
+
+/* Hoja para registrar */
+var sheetBg=document.getElementById("sheetBg"), sheet=document.getElementById("sheet");
+function closeSheet(){sheetBg.classList.remove("open");}
+sheetBg.addEventListener("click",function(e){if(e.target===sheetBg)closeSheet();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet();});
+
+function openLog(id){
+  var ls=logsOf(id), last=ls[ls.length-1], u=unit(id);
+  var kg=last?last.kg:(BASE_EX[id].bw?0:20), n=last?last.n:(u==="m"?30:8);
+  var variant=BASE_EX[id].variant;
+  var h='<h3 id="sheetTitle">'+esc(exName(id))+"</h3>";
+  if(variant)h+='<div><label for="lgVar">Variante (opcional)</label><input id="lgVar" type="text" value="'+esc(S.names[id]||"")+'" placeholder="'+(id==="remo"?"Por ejemplo, a un brazo, Pendlay o seal row":id==="pm2"?"Por ejemplo, peso muerto rumano":"Por ejemplo, sentadilla búlgara")+'"></div>';
+  h+='<div><label for="lgKg">Kilos'+(BASE_EX[id].bw?" agregados (0 si es solo con tu peso)":"")+(u==="m"?" en cada mano":"")+'</label><div class="stepper"><button type="button" data-step="kg" data-d="-2.5" aria-label="Restar 2,5 kilos">−</button><input id="lgKg" type="number" inputmode="decimal" step="0.5" min="0" value="'+kg+'"><button type="button" data-step="kg" data-d="2.5" aria-label="Sumar 2,5 kilos">+</button></div><div class="quick" style="margin-top:6px"><button type="button" data-step="kg" data-d="-1">−1 kg</button><button type="button" data-step="kg" data-d="1">+1 kg</button><button type="button" data-step="kg" data-d="5">+5 kg</button></div></div>';
+  h+='<div><label for="lgN">'+(u==="m"?"Metros recorridos":"Repeticiones")+'</label><div class="stepper"><button type="button" data-step="n" data-d="'+(u==="m"?-5:-1)+'" aria-label="Restar">−</button><input id="lgN" type="number" inputmode="numeric" min="0" value="'+n+'"><button type="button" data-step="n" data-d="'+(u==="m"?5:1)+'" aria-label="Sumar">+</button></div></div>';
+  h+='<div><label for="lgDate">Fecha</label><input id="lgDate" type="date" value="'+today()+'" max="'+today()+'"></div>';
+  h+='<div class="hint">Anotá la serie más pesada del día. Lo ideal es terminarla sintiendo que podrías haber hecho una o dos repeticiones más.</div>';
+  h+='<div class="row"><button class="btn ghost" id="lgCancel">Cancelar</button><button class="btn" id="lgSave">Guardar</button></div>';
+  sheet.innerHTML=h;sheetBg.classList.add("open");
+  sheet.querySelectorAll("[data-step]").forEach(function(b){b.onclick=function(){var inp=document.getElementById(b.getAttribute("data-step")==="kg"?"lgKg":"lgN");var v=(parseFloat(String(inp.value).replace(",","."))||0)+parseFloat(b.getAttribute("data-d"));inp.value=Math.max(0,Math.round(v*10)/10);};});
+  document.getElementById("lgCancel").onclick=closeSheet;
+  document.getElementById("lgSave").onclick=function(){
+    var k=parseFloat(String(document.getElementById("lgKg").value).replace(",","."));var r=parseInt(document.getElementById("lgN").value,10);var d=document.getElementById("lgDate").value||today();
+    if(isNaN(k)||k<0||isNaN(r)||r<1){toast("Revisá los kilos y "+(u==="m"?"los metros":"las repeticiones"));return;}
+    if(variant){var vv=document.getElementById("lgVar").value.trim();S.names[id]=vv;}
+    if(S.demo){S=blank();if(variant)S.names[id]=document.getElementById("lgVar").value.trim();}
+    var prev=best(logsOf(id));
+    var entry={id:S.nextId++,ex:id,date:d,kg:k,n:r};S.logs.push(entry);save();closeSheet();render();
+    toast(prev&&better(entry,prev)?"¡Nuevo récord en "+exName(id)+"!":(storageOK?"Guardado":"No se pudo guardar en este navegador"));
+  };
+  setTimeout(function(){var f=document.getElementById("lgKg");if(f)f.focus();},50);
+}
+function confirmSheet(msg,label,ok){
+  sheet.innerHTML='<h3 id="sheetTitle">'+esc(label)+'</h3><p style="margin:0">'+esc(msg)+'</p><div class="row"><button class="btn ghost" id="cfNo">Cancelar</button><button class="btn" id="cfYes">'+esc(label)+"</button></div>";
+  sheetBg.classList.add("open");
+  document.getElementById("cfNo").onclick=closeSheet;
+  document.getElementById("cfYes").onclick=function(){closeSheet();ok();};
+}
+
+main.addEventListener("click",function(e){
+  var b=e.target.closest("[data-log]");if(b){openLog(b.getAttribute("data-log"));return;}
+  var d=e.target.closest("[data-del]");if(d){var lid=+d.getAttribute("data-del");confirmSheet("¿Borrar este registro?","Borrar",function(){S.logs=S.logs.filter(function(l){return l.id!==lid;});save();render();});}
+});
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){view=b.getAttribute("data-view");render();};});
+render();
+if("serviceWorker" in navigator){try{navigator.serviceWorker.register("../sw.js",{scope:"../"});}catch(e){}}
+})();
+</script>
+</body>
+</html>
