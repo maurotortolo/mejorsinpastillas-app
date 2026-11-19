@@ -1,5 +1,5 @@
 /* Mejor sin pastillas · service worker. Al publicar una versión nueva, cambiar VERSION. Nunca toca los datos guardados (localStorage). */
-const VERSION = "msp-2026-11-18-3";
+const VERSION = "msp-2026-11-19-1";
 const FILES = ["./", "./index.html", "./fuerza/", "./fuerza/index.html", "./planilla/", "./planilla/index.html", "./examenes/", "./examenes/index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {

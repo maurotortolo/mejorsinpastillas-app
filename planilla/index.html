@@ -132,14 +132,14 @@ var PILARES=[
    {id:"ub",label:"Último bocado",hint:"Horario",t:"time",late:true},
    {id:"sac",label:"Cuánto comer",hint:"Según tu saciedad",t:"sat"}]},
  {id:"fis",name:"Entrenamiento físico",rows:[
-   {id:"e1",label:"Ejercicio 1",t:"check",act:true},
-   {id:"e2",label:"Ejercicio 2",t:"check",act:true},
-   {id:"e3",label:"Ejercicio 3",t:"check",act:true},
+   {id:"e1",label:"Ejercicio 1",t:"check",act:"fis"},
+   {id:"e2",label:"Ejercicio 2",t:"check",act:"fis"},
+   {id:"e3",label:"Ejercicio 3",t:"check",act:"fis"},
    {id:"pasos",label:"Pasos",hint:"Aproximados",t:"num",step:1000,unit:""}]},
  {id:"men",name:"Entrenamiento mental",rows:[
    {id:"med",label:"Meditación",hint:"Minutos",t:"num",step:5,unit:"min"},
-   {id:"m2",label:"Mental 2",t:"check",named:true},
-   {id:"m3",label:"Mental 3",t:"check",named:true}]},
+   {id:"m2",label:"Mental 2",t:"check",act:"men"},
+   {id:"m3",label:"Mental 3",t:"check",act:"men"}]},
  {id:"nat",name:"Conexión natural",rows:[
    {id:"pant",label:"Tiempo de pantalla",hint:"Horas, según el celular",t:"num",step:0.5,unit:"h"},
    {id:"apag",label:"Apagado de pantallas",hint:"Hora",t:"time",late:true},
@@ -155,7 +155,12 @@ var PILARES=[
 ];
 var ROWS={};PILARES.forEach(function(p){p.rows.forEach(function(r){r.pil=p.id;ROWS[r.id]=r;});});
 var ACTS=[["fuerza","Entrenamiento de fuerza","Fuerza"],["caminata","Caminata","Caminata"],["running","Running","Running"],["ciclismo","Ciclismo","Bici"],["spinning","Spinning","Spinning"],["natacion","Natación","Natación"],["deporte","Deporte","Deporte"],["yoga","Yoga, pilates o movilidad","Yoga"],["otro","Otro","Otro"]];
-function actL(id,i){for(var k=0;k<ACTS.length;k++)if(ACTS[k][0]===id)return ACTS[k][i||1];return "";}
+var MENT=[["diario","Diario personal","Diario"],["oracion","Oración contemplativa","Oración"],["psico","Sesión de psicología","Psicología"],["coaching","Sesión de coaching","Coaching"],["constel","Sesión de constelaciones familiares","Constel."],["otro","Otro","Otro"]];
+var LISTS={fis:ACTS,men:MENT};
+var OTRO_PH={fis:"¿Qué hiciste? Por ejemplo, remo o baile",men:"¿Qué hiciste? Por ejemplo, respiración o lectura espiritual"};
+function actL(id,i,L){L=LISTS[L]||ACTS;for(var k=0;k<L.length;k++)if(L[k][0]===id)return L[k][i||1];return "";}
+/* Convierte un nombre escrito a mano en una opción de la lista (o en "Otro" con ese texto) */
+function nameToAct(x,id,txt){var t=txt.trim().toLowerCase();for(var k=0;k<MENT.length-1;k++){if(MENT[k][1].toLowerCase()===t||MENT[k][2].toLowerCase()===t){x.lastAct[id]=MENT[k][0];return;}}x.lastAct[id]="otro";x.lastTxt[id]=txt.trim();}
 var WEEKLY=[{id:"peso",label:"Peso",unit:"kg",step:0.1},{id:"cint",label:"Cintura",unit:"cm",step:0.5}];
 var DIAS=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 var DIAS_L=["lunes","martes","miércoles","jueves","viernes","sábado","domingo"];
@@ -175,7 +180,7 @@ function tmin(t,late){if(!t)return null;var p=t.split(":");var m=(+p[0])*60+(+p[
 function mstr(m){m=Math.round(m)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");}
 
 function blank(){return {v:1,d:{},w:{},names:{},lastAct:{},lastTxt:{},soloPrio:false};}
-function migrate(x){if(!x||typeof x!=="object")return blank();if(!x.v)x.v=1;if(!x.d)x.d={};if(!x.w)x.w={};if(!x.names)x.names={};if(!x.lastAct){x.lastAct={};x.lastTxt={};["e1","e2","e3"].forEach(function(k){if(x.names[k]){x.lastAct[k]="otro";x.lastTxt[k]=x.names[k];}});}if(!x.lastTxt)x.lastTxt={};return x;}
+function migrate(x){if(!x||typeof x!=="object")return blank();if(!x.v)x.v=1;if(!x.d)x.d={};if(!x.w)x.w={};if(!x.names)x.names={};if(!x.lastAct){x.lastAct={};x.lastTxt={};["e1","e2","e3"].forEach(function(k){if(x.names[k]){x.lastAct[k]="otro";x.lastTxt[k]=x.names[k];}});}if(!x.lastTxt)x.lastTxt={};["m2","m3"].forEach(function(k){if(x.names[k]&&!x.lastAct[k])nameToAct(x,k,x.names[k]);});return x;}
 var S;
 try{var raw=localStorage.getItem(KEY);S=raw?migrate(JSON.parse(raw)):blank();}catch(e){S=blank();}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
@@ -183,7 +188,7 @@ var storageOK=true;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));storageOK=true;}catch(e){storageOK=false;toast("No se pudo guardar en este navegador");}}
 
 function demo(){
-  var x=blank();x.demo=true;x.names={m2:"Diario personal",m3:"Respiración"};x.lastAct={e1:"fuerza",e2:"caminata",e3:"ciclismo"};
+  var x=blank();x.demo=true;x.lastAct={e1:"fuerza",e2:"caminata",e3:"ciclismo",m2:"diario",m3:"oracion"};
   var start=addDays(monday(today()),-35), seed=7;
   function rnd(){seed=(seed*9301+49297)%233280;return seed/233280;}
   for(var i=0;i<42;i++){
@@ -194,7 +199,7 @@ function demo(){
     e.sac=rnd()<0.7?"=":(rnd()<0.5?"+":"-");
     if(dow(day)%2===0&&rnd()<0.6+k*0.3){e.e1=true;e.e1a="fuerza";} if(rnd()<0.4+k*0.3){e.e2=true;e.e2a=rnd()<0.7?"caminata":"ciclismo";}
     e.pasos=Math.round((5000+k*3000+rnd()*3000)/500)*500;
-    e.med=rnd()<0.4+k*0.4?(10+Math.round(rnd()*2)*5):0; if(rnd()<0.5)e.m2=true;
+    e.med=rnd()<0.4+k*0.4?(10+Math.round(rnd()*2)*5):0; if(rnd()<0.5){e.m2=true;e.m2a="diario";} if(rnd()<0.25+k*0.2){e.m3=true;e.m3a="oracion";}
     e.pant=Math.round((5-k*2+rnd()*1.5)*2)/2; e.apag=(rnd()<0.5?"22:":"23:")+(rnd()<0.5?"00":"30");
     e.acos=(rnd()<0.6?"23:":"00:")+(rnd()<0.5?"00":"30"); e.lev=(rnd()<0.5?"07:":"07:")+(rnd()<0.5?"00":"30");
     e.sue=Math.min(10,Math.round(5+k*2+rnd()*2)); e.sol=Math.round((10+k*15+rnd()*10)/5)*5;
@@ -208,7 +213,7 @@ function demo(){
 
 var toastT;
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2400);}
-function rname(r){if(r.act){var a=S.lastAct&&S.lastAct[r.id];return a?(a==="otro"&&S.lastTxt[r.id]?S.lastTxt[r.id]:actL(a)):r.label;}return (r.named&&S.names[r.id])?S.names[r.id]:r.label;}
+function rname(r){if(r.act){var a=S.lastAct&&S.lastAct[r.id];return a?(a==="otro"&&S.lastTxt[r.id]?S.lastTxt[r.id]:actL(a,1,r.act)):r.label;}return (r.named&&S.names[r.id])?S.names[r.id]:r.label;}
 function dayAct(d,id){var e=dayQ(d);return e[id+"a"]||null;}
 function week(m){if(!S.w[m])S.w[m]={prio:[],para:""};return S.w[m];}
 function weekQ(m){return S.w[m]||{prio:[],para:""};}
@@ -246,8 +251,8 @@ function control(r,d){
 function actControl(r,d){
   var cur=dayAct(d,r.id)||(S.lastAct&&S.lastAct[r.id])||"";
   var txt=(dayQ(d)[r.id+"t"])||(S.lastTxt&&S.lastTxt[r.id])||"";
-  var h='<select data-act="'+r.id+'" aria-label="Actividad del '+esc(r.label)+'"><option value="">Elegí la actividad</option>'+ACTS.map(function(a){return '<option value="'+a[0]+'"'+(a[0]===cur?" selected":"")+">"+a[1]+"</option>";}).join("")+"</select>";
-  if(cur==="otro")h+='<input type="text" data-acttxt="'+r.id+'" value="'+esc(txt)+'" placeholder="¿Qué hiciste? Por ejemplo, remo o baile" aria-label="Otra actividad">';
+  var h='<select data-act="'+r.id+'" aria-label="Actividad del '+esc(r.label)+'"><option value="">Elegí la actividad</option>'+(LISTS[r.act]||ACTS).map(function(a){return '<option value="'+a[0]+'"'+(a[0]===cur?" selected":"")+">"+a[1]+"</option>";}).join("")+"</select>";
+  if(cur==="otro")h+='<input type="text" data-acttxt="'+r.id+'" value="'+esc(txt)+'" placeholder="'+esc(OTRO_PH[r.act]||OTRO_PH.fis)+'" aria-label="Otra actividad">';
   return h;
 }
 function renderHoy(){
@@ -308,7 +313,7 @@ function rowSummary(r,vals){
   return {txt:num(avg,1),val:avg};
 }
 function cellTxt(r,v,d){
-  if(r.act&&v===true){var a=dayAct(d,r.id);if(a)return '<span style="font-size:11px">'+(a==="otro"&&dayQ(d)[r.id+"t"]?esc(dayQ(d)[r.id+"t"]).slice(0,9):actL(a,2))+"</span>";}
+  if(r.act&&v===true){var a=dayAct(d,r.id);if(a)return '<span style="font-size:11px">'+(a==="otro"&&dayQ(d)[r.id+"t"]?esc(dayQ(d)[r.id+"t"]).slice(0,9):actL(a,2,r.act))+"</span>";}
   if(v==null||v==="")return "";
   if(r.t==="check")return v?"✓":"";
   if(r.t==="pct")return v+"%";
@@ -393,12 +398,11 @@ function renderEvolucion(){
 
 /* ---------- MÁS ---------- */
 function renderMas(){
-  var h='<div class="card"><h3>Tus hábitos mentales</h3><p class="muted" style="margin:0 0 10px">Escribí qué hacés en las filas de entrenamiento mental. Por ejemplo, diario personal, respiración o psicoterapia. Los ejercicios físicos se eligen de una lista en la pestaña Hoy.</p>'+["m2","m3"].map(function(id){return '<label for="nm_'+id+'">'+ROWS[id].label+'</label><input type="text" id="nm_'+id+'" data-name="'+id+'" value="'+esc(S.names[id]||"")+'" style="margin-bottom:10px">';}).join("")+"</div>";
+  var h='';
   h+='<div class="card"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px">Tus registros se guardan solo en este teléfono. Una vez por mes, guardá una copia, por ejemplo mandándotela por WhatsApp o guardándola en Drive.</p><div class="btnrow"><button class="btn" id="bkFile">Guardar copia de seguridad</button></div><div class="btnrow" style="margin-top:8px"><button class="btn sec" id="bkCopy">Copiar como texto</button></div><label for="bkUp" style="margin-top:12px">Para recuperar tus datos, elegí el archivo de tu copia</label><input id="bkUp" type="file" accept=".json,application/json,text/plain"><label for="bkIn" style="margin-top:12px">O pegá acá la copia en texto</label><textarea id="bkIn" rows="3"></textarea><div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="bkLoad">Recuperar datos</button></div></div>';
   h+='<div class="card"><h3>Antes de empezar</h3><p class="muted" style="margin:0">Esta app es una ayuda para registrar tus hábitos y no reemplaza la indicación de tu médico. Si tomás medicación para la presión o la diabetes, no la modifiques por tu cuenta. Si tenés antecedentes de un trastorno de la conducta alimentaria, consultá con tu profesional antes de registrar peso, cintura o comidas.</p></div>';
   h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros de la planilla en este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div><footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
-  main.querySelectorAll("[data-name]").forEach(function(i){i.onchange=function(){S.names[i.getAttribute("data-name")]=i.value.trim();save();toast("Guardado");};});
   function backupDone(){S.lastBackup=new Date().toISOString();save();}
   function restoreObj(d){d=migrate(d);confirmSheet("¿Reemplazar tus datos actuales por los de la copia de seguridad?","Recuperar",function(){S=d;S.demo=false;save();render();toast("Datos recuperados");});}
   document.getElementById("bkFile").onclick=function(){
