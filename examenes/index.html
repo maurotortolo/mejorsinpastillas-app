@@ -88,10 +88,10 @@ var hdr=document.getElementById("hdr"),main=document.getElementById("main");
 var cur=null,qi=0,answers=[];
 function fecha(iso){var d=new Date(iso);return d.getDate()+"/"+(d.getMonth()+1);}
 
-function resumen(nm){
+function resumen(nm,sel){
   var d=new Date(),L=["*Mini exámenes · Mejor sin pastillas*","Paciente: "+nm,"Enviado el "+d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(),""],no=[];
   EX.forEach(function(e){var r=S.r[e.n],n=e.q.length;
-    if(!r){no.push(e.n);return;}
+    if(!r||sel.indexOf(e.n)<0)return;
     var p=[];
     p.push("1.er intento "+(r.first!=null?r.first+"/"+n:"sin dato"));
     if(r.tries>1)p.push("mejor "+r.best+"/"+n);
@@ -99,7 +99,6 @@ function resumen(nm){
     p.push("último "+fecha(r.date));
     L.push(e.n+". "+e.title+": "+p.join(" · "));
   });
-  if(no.length)L.push("","Sin hacer: "+no.join(", "));
   return L.join("\n");
 }
 function list(){
@@ -114,13 +113,15 @@ function list(){
   if(Object.keys(S.r).length){
     h+='<div class="card"><h3>Enviar resultados a mi médico</h3><p class="muted" style="margin:0 0 10px">Se abre WhatsApp con el resumen listo para enviar al Dr. Mauro Tortolo. Vos decidís si lo mandás.</p>'+
       '<label class="muted" for="nom">Tu nombre y apellido</label><input id="nom" autocomplete="name" value="'+esc(S.name||"")+'" style="display:block;width:100%;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:4px 0 10px">'+
-      '<button class="btn" id="send">Enviar por WhatsApp</button></div>';
+      '<p class="muted" style="margin:0 0 6px">Elegí qué exámenes enviar:</p><div id="sel" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">'+
+      EX.filter(function(e){return S.r[e.n];}).map(function(e){var r=S.r[e.n];return '<label style="display:flex;gap:10px;align-items:center;font-size:16px"><input type="checkbox" value="'+e.n+'" style="width:22px;height:22px;flex:none"><span>'+e.n+". "+esc(e.title)+' <span class="muted">('+r.best+"/"+e.q.length+")</span></span></label>";}).join("")+
+      '</div><button class="btn" id="send">Enviar por WhatsApp</button><p class="muted" id="selmsg" style="margin:8px 0 0"></p></div>';
     h+='<button class="link" id="reset">Borrar mis resultados</button>';
   }
   h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;main.scrollTop=0;
   main.querySelectorAll("[data-ex]").forEach(function(b){b.onclick=function(){start(+b.getAttribute("data-ex"));};});
-  var sb=document.getElementById("send");if(sb)sb.onclick=function(){var inp=document.getElementById("nom"),nm=inp.value.trim();if(!nm){inp.focus();inp.placeholder="Escribí tu nombre para que sepa quién lo envía";return;}S.name=nm;save();location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(resumen(nm));};
+  var sb=document.getElementById("send");if(sb)sb.onclick=function(){var inp=document.getElementById("nom"),nm=inp.value.trim();if(!nm){inp.focus();inp.placeholder="Escribí tu nombre para que sepa quién lo envía";return;}var sel=[].slice.call(document.querySelectorAll('#sel input:checked')).map(function(x){return +x.value;});if(!sel.length){document.getElementById("selmsg").textContent="Marcá al menos un examen.";return;}S.name=nm;save();location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(resumen(nm,sel));};
   var r=document.getElementById("reset");if(r)r.onclick=function(){if(r.dataset.c){S={v:1,r:{},name:S.name};save();list();}else{r.dataset.c=1;r.textContent="Tocá de nuevo para confirmar";}};
 }
 function start(n){cur=EX[n-1];qi=0;answers=[];question();}
@@ -152,12 +153,14 @@ function result(){
   var r=S.r[cur.n]||{best:0,tries:0};if(!r.tries){r.first=c;r.firstDate=new Date().toISOString();}r.best=Math.max(r.best,c);r.last=c;r.tries++;r.date=new Date().toISOString();S.r[cur.n]=r;save();
   var msg=c===n?"¡Todas bien! Comprendiste a fondo estos capítulos.":c>=n*0.7?"Muy bien. Repasá las que se te escaparon y vas a tenerlo claro.":"Buen punto de partida. Releé los capítulos y volvé a intentarlo cuando quieras: equivocarte también es aprender.";
   var h='<div class="card" style="text-align:center"><p class="big">'+c+" de "+n+'</p><p style="margin:4px 0 0">'+msg+"</p></div>";
+  h+='<button class="btn" id="toSend" style="background:#25D366;color:#fff">Enviar este resultado a mi médico</button>';
   var miss=cur.q.map(function(q,i){return {q:q,i:i};}).filter(function(x){return !answers[x.i];});
   if(miss.length)h+='<div class="card"><h3>Para repasar</h3>'+miss.map(function(x){var q=x.q;return '<div class="miss"><b>'+(x.i+1)+". "+esc(q.t)+'</b><div class="muted">Respuesta: '+esc(q.tf?(q.a===0?"Verdadero":"Falso"):"abcd"[q.a]+") "+q.o[q.a])+"</div></div>";}).join("")+'<p class="muted" style="margin:10px 0 0">Capítulos: '+esc(cur.repaso||cur.caps||"")+".</p></div>";
   h+='<button class="btn" id="again">Volver a intentarlo</button><button class="btn ghost" id="toList">Ver todos los exámenes</button>';
   if(cur.n<EX.length)h+='<button class="btn ghost" id="nextEx">Siguiente: '+esc(EX[cur.n].title)+"</button>";
   main.innerHTML=h;main.scrollTop=0;
   document.getElementById("again").onclick=function(){start(cur.n);};
+  document.getElementById("toSend").onclick=function(){var en=cur.n;if(S.name){location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(resumen(S.name,[en]));return;}list();var k=document.querySelector('#sel input[value="'+en+'"]');if(k)k.checked=true;var c=document.getElementById("nom");if(c){c.scrollIntoView({block:"center"});c.focus();}};
   document.getElementById("toList").onclick=list;
   var ne=document.getElementById("nextEx");if(ne)ne.onclick=function(){start(cur.n+1);};
 }
