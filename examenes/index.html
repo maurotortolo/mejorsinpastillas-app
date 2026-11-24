@@ -89,7 +89,7 @@ var cur=null,qi=0,answers=[];
 function fecha(iso){var d=new Date(iso);return d.getDate()+"/"+(d.getMonth()+1);}
 
 function resumen(nm,sel){
-  var d=new Date(),L=["*Mini exámenes · Mejor sin pastillas*","Paciente: "+nm,"Enviado el "+d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(),""],no=[];
+  var d=new Date(),L=["*Mini exámenes · Mejor Sin Pastillas*","Paciente: "+nm,"Enviado el "+d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(),""],no=[];
   EX.forEach(function(e){var r=S.r[e.n],n=e.q.length;
     if(!r||sel.indexOf(e.n)<0)return;
     var p=[];
@@ -102,7 +102,7 @@ function resumen(nm,sel){
   return L.join("\n");
 }
 function list(){
-  hdr.innerHTML='<a href="../">‹ Mejor sin pastillas</a><h1>Mini exámenes</h1><p>Repasá lo aprendido en el libro.</p>';
+  hdr.innerHTML='<a href="../">‹ Mejor Sin Pastillas</a><h1>Mini exámenes</h1><p>Repasá lo aprendido en el libro.</p>';
   var h='<div class="intro">La clave es comprender, no obedecer. No hay nota ni aprobado: equivocarte acá también es aprender. Respondé sin mirar el libro y, después de cada pregunta, vas a ver el porqué y dónde repasarlo.</div>';
   var part=null;
   EX.forEach(function(e){

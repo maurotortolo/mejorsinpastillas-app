@@ -8,8 +8,8 @@
 <link rel="icon" href="../icons/icon-192.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mi fuerza">
-<title>Mi fuerza</title>
+<meta name="apple-mobile-web-app-title" content="Fuerza">
+<title>Fuerza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
@@ -102,8 +102,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 0 8px}
 <body>
 <div class="app">
   <header>
-    <a class="brand" href="../" style="color:#fff;text-decoration:none">‹ Mejor sin pastillas</a>
-    <h1 id="title">Mi fuerza</h1>
+    <a class="brand" href="../entrenamiento/" style="color:#fff;text-decoration:none">‹ Registro de mi entrenamiento</a>
+    <h1 id="title">Fuerza</h1>
     <p id="subtitle">Anotá tu serie más pesada de cada ejercicio.</p>
   </header>
   <main id="main"></main>
@@ -132,7 +132,7 @@ var PATTERNS=[
   {id:"ac",name:"Acarreo",ex:["gr"]}
 ];
 var BASE_EX={
-  pm:{name:"Peso muerto"}, pm2:{name:"Otro peso muerto",variant:true},
+  pm:{name:"Peso muerto convencional"}, pm2:{name:"Otro peso muerto",variant:true},
   sq:{name:"Sentadilla con barra atrás"}, sq2:{name:"Otra sentadilla",variant:true},
   pp:{name:"Press plano"}, pi:{name:"Press inclinado"},
   remo:{name:"Remo",variant:true}, dom:{name:"Dominadas",bw:true},
@@ -284,7 +284,7 @@ function renderMas(){
   h+='<div class="card"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px">Tus registros se guardan solo en este teléfono. Si cambiás de teléfono o borrás los datos del navegador, se pierden. Una vez por mes, guardá una copia de seguridad, por ejemplo mandándotela por WhatsApp o guardándola en Drive.</p><div class="row"><button class="btn" id="bkFile">Guardar copia de seguridad</button></div><div class="row" style="margin-top:8px"><button class="btn sec" id="bkCopy">Copiar como texto</button></div><label for="bkUp" style="margin-top:12px">Para recuperar tus datos, elegí el archivo de tu copia</label><input id="bkUp" type="file" accept=".json,application/json,text/plain"><label for="bkIn" style="margin-top:12px">O pegá acá la copia en texto</label><textarea id="bkIn" rows="3"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="bkLoad">Recuperar datos</button></div></div>';
   h+='<div class="card"><h3>Antes de empezar</h3><p class="muted" style="margin:0">Esta app es una ayuda para registrar tu entrenamiento y no reemplaza la indicación de tu médico ni de tu entrenador. Si tenés una lesión, dolor en el pecho, falta de aire o mareos al entrenar, pará y consultá.</p></div>';
   h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros y metas de este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div>';
-  h+='<footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
+  h+='<footer>Mejor Sin Pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
   document.getElementById("prof").onchange=function(e){S.prof=e.target.value;save();toast("Guardado");};
   main.querySelectorAll("[data-name]").forEach(function(i){i.onchange=function(){S.names[i.getAttribute("data-name")]=i.value.trim();save();toast("Guardado");};});
@@ -294,7 +294,7 @@ function renderMas(){
     var data=JSON.stringify({app:"msp-fuerza",fecha:today(),datos:S});
     var name="mi-fuerza-copia-"+today()+".json";
     try{var file=new File([data],name,{type:"application/json"});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · Mi fuerza"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}
+      if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · Fuerza"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}
     }catch(e){}
     try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();backupDone();toast("Copia descargada");}catch(e){toast("No se pudo guardar el archivo. Probá con Copiar como texto.");}
   };
