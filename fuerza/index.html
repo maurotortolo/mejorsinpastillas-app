@@ -97,6 +97,26 @@ td.del{text-align:right}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 0 8px}
+.tscroll{overflow-x:auto}
+table.mes{min-width:100%;font-size:15px}
+table.mes th[scope=row],table.mes thead th:first-child,table.mes tr.grp th{position:sticky;left:0;background:var(--card);z-index:1}
+table.mes th[scope=row],table.mes thead th:first-child{box-shadow:1px 0 0 var(--line)}
+table.mes th[scope=row]{font-weight:700;color:var(--ink);font-size:13px;min-width:118px;max-width:140px;white-space:normal}
+table.mes tr.grp th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);padding-top:12px;text-align:left}
+table.mes td,table.mes thead th{white-space:nowrap;text-align:center;min-width:78px}
+table.mes td:last-child,table.mes thead th:last-child{background:var(--mint)}
+.sr{position:absolute;left:-9999px}
+.mgrp h4{margin:6px 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.mex{padding:8px 0;border-top:1px solid var(--line)}
+.mname{font-weight:700;margin-bottom:6px}
+.mrow{display:flex;align-items:center;gap:8px}
+.mrow input{width:84px;flex:none;text-align:center;font-size:18px;font-weight:700}
+.mrow span{color:var(--muted);font-size:15px}
+.sum{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.sum:first-of-type{border-top:0}
+.delta{flex:none;font-weight:700;font-size:17px;text-align:right;font-variant-numeric:tabular-nums}
+.delta small{display:block;font-size:13px;font-weight:400}
+.delta.up{color:var(--good)}.delta.down{color:var(--warn)}.delta.eq{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -104,12 +124,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 0 8px}
   <header>
     <a class="brand" href="../entrenamiento/" style="color:#fff;text-decoration:none">‹ Registro de mi entrenamiento</a>
     <h1 id="title">Fuerza</h1>
-    <p id="subtitle">Anotá tu serie más pesada de cada ejercicio.</p>
+    <p id="subtitle">Tu mejor marca de cada mes, como en el cuaderno.</p>
   </header>
   <main id="main"></main>
   <nav aria-label="Secciones">
-    <button data-view="registrar" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Registrar</button>
-    <button data-view="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M5 15l4-4 4 3 6-7"/></svg>Progreso</button>
+    <button data-view="mes" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 5v15M15 5v15"/></svg>Mes a mes</button>
+    <button data-view="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M5 15l4-4 4 3 6-7"/></svg>Evolución</button>
     <button data-view="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>Metas</button>
     <button data-view="mas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Más</button>
   </nav>
@@ -177,7 +197,7 @@ function markTxt(l,id){return (l.kg?num(l.kg)+" kg":(BASE_EX[id].bw?"peso corpor
 var toastT;
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2200);}
 
-var view="registrar", progEx="pm";
+var view="mes", progEx="pm";
 var main=document.getElementById("main");
 
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
@@ -190,28 +210,111 @@ function topNotices(){
   return h;
 }
 function demoBanner(){
-  if(!S.demo){ if(!S.logs.length) return '<div class="banner"><div><b>¡Bienvenido!</b> Tocá un ejercicio para anotar tu primera serie. ¿Querés ver cómo se ve la app después de unos meses?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>'; return "";}
-  return '<div class="banner"><div><b>Estás viendo un ejemplo.</b> Así se ve la app después de unos meses de entrenamiento. Cuando anotes tu primera serie real, el ejemplo se borra solo.</div><div><button class="btn" id="startFresh">Salir del ejemplo</button></div></div>';
+  if(!S.demo){ if(!S.logs.length) return '<div class="banner"><div><b>¡Bienvenido!</b> Al terminar cada mes, completá tu mejor marca de cada ejercicio: la carga más alta que usaste y cuántas repeticiones hiciste con ella. Así vas a ver tu evolución mes a mes. ¿Querés ver cómo se ve después de unos meses?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>'; return "";}
+  return '<div class="banner"><div><b>Estás viendo un ejemplo.</b> Así se ve la app después de unos meses de entrenamiento. Cuando completes tu primer mes, el ejemplo se borra solo.</div><div><button class="btn" id="startFresh">Salir del ejemplo</button></div></div>';
 }
 
-function renderRegistrar(){
-  var thisMonth=monthKey(today());
+/* Registro mensual: una marca por ejercicio y por mes (la carga más alta y las repeticiones con esa carga). */
+var WA="5493462306304";
+var MESES_L=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function mk(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function monthFull(k){var p=k.split("-");return MESES_L[+p[1]-1]+" "+p[0];}
+function suggestedMonth(){var d=new Date();d.setDate(1);if(new Date().getDate()<=10)d.setMonth(d.getMonth()-1);return mk(d);}
+function monthsBack(n){var r=[],d=new Date();d.setDate(1);for(var i=0;i<n;i++){r.push(mk(d));d.setMonth(d.getMonth()-1);}return r;}
+function bestIn(id,k){return best(logsOf(id).filter(function(l){return monthKey(l.date)===k;}));}
+function allExIds(){var r=[];PATTERNS.forEach(function(p){p.ex.forEach(function(id){r.push(id);});});return r;}
+function monthsShown(){var m={};S.logs.forEach(function(l){m[monthKey(l.date)]=1;});return Object.keys(m).sort().slice(-6);}
+function shortMark(l,id){if(!l)return "—";var kg=l.kg?num(l.kg):(BASE_EX[id].bw?"PC":"0");return kg+" × "+l.n+(unit(id)==="m"?" m":"");}
+
+function renderMes(){
   var h=topNotices()+demoBanner();
-  PATTERNS.forEach(function(p){
-    h+='<section class="group"><h2>'+p.name+'</h2><div class="list">';
-    p.ex.forEach(function(id){
-      var ls=logsOf(id), last=ls[ls.length-1];
-      var bm=best(ls.filter(function(l){return monthKey(l.date)===thisMonth;}));
-      var allBest=best(ls);
-      var meta=last?("Última: "+markTxt(last,id)+" · "+fmtDate(last.date)):"Todavía sin registros";
-      var chip=(last&&allBest===last&&ls.length>1)?'<span class="chip">Récord</span>':"";
-      var month=bm?'<div class="meta">Mejor de este mes: '+markTxt(bm,id)+"</div>":"";
-      h+='<button class="ex" data-log="'+id+'"><span class="txt"><span class="name">'+esc(exName(id))+chip+'</span><div class="meta">'+meta+"</div>"+month+'</span><span class="plus" aria-hidden="true">+</span><span class="sr" style="position:absolute;left:-9999px">Registrar '+esc(exName(id))+"</span></button>";
+  var sm=suggestedMonth(), done=allExIds().some(function(id){return bestIn(id,sm);});
+  h+='<button class="btn" id="fillMonth" style="padding:16px;font-size:19px">'+(done?"Revisar ":"Completar ")+monthFull(sm)+'</button>';
+  var ms=monthsShown();
+  if(!ms.length){
+    h+='<div class="card"><h3>¿Cómo se usa?</h3><p class="muted" style="margin:0">Al final de cada mes, tocá el botón de arriba y anotá, para cada ejercicio, la carga más alta que usaste y cuántas repeticiones hiciste con ella. Si en algún ejercicio no entrenaste, dejalo en blanco. La app arma tu tabla y tus gráficos.</p></div>';
+  } else {
+    h+='<div class="card" style="padding:0"><div class="tscroll"><table class="mes"><thead><tr><th scope="col"><span class="sr">Ejercicio</span></th>'+ms.map(function(k){return '<th scope="col"><button class="icon-btn" data-month="'+k+'" aria-label="Editar '+monthFull(k)+'">'+monthLabel(k)+"</button></th>";}).join("")+"</tr></thead><tbody>";
+    PATTERNS.forEach(function(p){
+      var ids=p.ex.filter(function(id){return ms.some(function(k){return bestIn(id,k);});});
+      if(!ids.length)return;
+      h+='<tr class="grp"><th scope="rowgroup" colspan="'+(ms.length+1)+'">'+p.name+"</th></tr>";
+      ids.forEach(function(id){h+='<tr><th scope="row">'+esc(exName(id))+"</th>"+ms.map(function(k){return "<td>"+shortMark(bestIn(id,k),id)+"</td>";}).join("")+"</tr>";});
     });
-    h+="</div></section>";
-  });
+    h+='</tbody></table></div></div><p class="muted" style="margin:0">Carga máxima (kg) × repeticiones de cada mes. PC: solo con tu peso corporal. Tocá un mes para corregirlo; deslizá la tabla para ver meses anteriores.</p>';
+    h+='<div class="card"><h3>Compartir con tu médico</h3><p class="muted" style="margin:0 0 10px">Se abre WhatsApp con tu tabla de los últimos meses, lista para enviar al Dr. Mauro Tortolo. Vos decidís si la mandás.</p><button class="btn sec" id="sendDoc">Enviar mi evolución por WhatsApp</button></div>';
+  }
   h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
+  var sc=main.querySelector(".tscroll");if(sc)sc.scrollLeft=sc.scrollWidth;
+  document.getElementById("fillMonth").onclick=function(){openMonth(sm);};
+  var sd=document.getElementById("sendDoc");if(sd)sd.onclick=sendDoc;
+}
+
+function openMonth(k){
+  var opts=monthsBack(12);monthsShown().forEach(function(m){if(opts.indexOf(m)<0)opts.push(m);});opts.sort().reverse();
+  var prevK=(function(){var p=k.split("-"),d=new Date(+p[0],+p[1]-2,1);return mk(d);})();
+  var h='<h3 id="sheetTitle">Tu mejor marca del mes</h3>';
+  h+='<div><label for="mSel">Mes</label><select id="mSel">'+opts.map(function(m){return '<option value="'+m+'"'+(m===k?" selected":"")+">"+monthFull(m)+"</option>";}).join("")+"</select></div>";
+  h+='<div class="hint">Para cada ejercicio, anotá la carga más alta que usaste en el mes y cuántas repeticiones hiciste con ella. Dejá en blanco los que no hiciste.</div>';
+  PATTERNS.forEach(function(p){
+    h+='<div class="mgrp"><h4>'+p.name+"</h4>";
+    p.ex.forEach(function(id){
+      var cur=bestIn(id,k), pv=bestIn(id,prevK), u=unit(id);
+      h+='<div class="mex" data-ex="'+id+'"><div class="mname">'+esc(exName(id))+"</div>";
+      if(BASE_EX[id].variant)h+='<input type="text" data-f="var" value="'+esc(S.names[id]||"")+'" placeholder="'+(id==="remo"?"Variante de remo (opcional)":id==="pm2"?"¿Cuál? Por ejemplo, peso muerto rumano":"¿Cuál? Por ejemplo, sentadilla búlgara")+'" aria-label="Variante de '+esc(exName(id))+'" style="margin-bottom:6px">';
+      h+='<div class="mrow"><input type="number" inputmode="decimal" step="0.5" min="0" data-f="kg" value="'+(cur?cur.kg:"")+'" aria-label="Kilos en '+esc(exName(id))+'"><span>kg'+(BASE_EX[id].bw?" extra":"")+' ×</span><input type="number" inputmode="numeric" min="1" data-f="n" value="'+(cur?cur.n:"")+'" aria-label="'+(u==="m"?"Metros":"Repeticiones")+" en "+esc(exName(id))+'"><span>'+(u==="m"?"metros":"rep")+"</span></div>";
+      if(pv)h+='<div class="muted" style="font-size:13px;margin-top:2px">'+monthLabel(prevK)+": "+markTxt(pv,id)+"</div>";
+      h+="</div>";
+    });
+    h+="</div>";
+  });
+  h+='<div class="row"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">Guardar</button></div>';
+  sheet.innerHTML=h;sheetBg.classList.add("open");sheet.scrollTop=0;
+  document.getElementById("mSel").onchange=function(e){openMonth(e.target.value);};
+  document.getElementById("mCancel").onclick=closeSheet;
+  document.getElementById("mSave").onclick=function(){
+    var rows=[],bad=null;
+    sheet.querySelectorAll(".mex").forEach(function(r){
+      var id=r.getAttribute("data-ex"),kgv=r.querySelector('[data-f="kg"]').value.trim(),nv=r.querySelector('[data-f="n"]').value.trim(),vn=r.querySelector('[data-f="var"]');
+      var kg=kgv===""?null:parseFloat(kgv.replace(",",".")),n=nv===""?null:parseInt(nv,10);
+      if((kg==null)!==(n==null)||(kg!=null&&(isNaN(kg)||kg<0))||(n!=null&&(isNaN(n)||n<1))){if(!bad)bad=exName(id);}
+      rows.push({id:id,kg:kg,n:n,vn:vn?vn.value.trim():null});
+    });
+    if(bad){toast("Revisá "+bad+": completá los kilos y "+(bad.indexOf("granjero")>=0?"los metros":"las repeticiones"));return;}
+    if(S.demo&&rows.some(function(r){return r.kg!=null;})){var nm=S.names;S=blank();S.names=nm;}
+    rows.forEach(function(r){
+      if(r.vn!=null)S.names[r.id]=r.vn;
+      var cur=bestIn(r.id,k);
+      if(r.kg==null){if(cur)S.logs=S.logs.filter(function(l){return !(l.ex===r.id&&monthKey(l.date)===k);});return;}
+      if(cur&&cur.kg===r.kg&&cur.n===r.n)return;
+      S.logs=S.logs.filter(function(l){return !(l.ex===r.id&&monthKey(l.date)===k);});
+      S.logs.push({id:S.nextId++,ex:r.id,date:k+"-01",kg:r.kg,n:r.n});
+    });
+    save();closeSheet();view="mes";render();toast(storageOK?"Guardado: "+monthFull(k):"No se pudo guardar en este navegador");
+  };
+}
+
+function patientName(cb){
+  var nm=S.name;
+  if(!nm){try{var ex=JSON.parse(localStorage.getItem("msp_examenes_v1"));if(ex&&ex.name)nm=ex.name;}catch(e){}}
+  sheet.innerHTML='<h3 id="sheetTitle">Enviar a mi médico</h3><div><label for="pName">Tu nombre y apellido</label><input id="pName" type="text" autocomplete="name" value="'+esc(nm||"")+'"></div><div class="row"><button class="btn ghost" id="pNo">Cancelar</button><button class="btn" id="pOk">Abrir WhatsApp</button></div>';
+  sheetBg.classList.add("open");
+  document.getElementById("pNo").onclick=closeSheet;
+  document.getElementById("pOk").onclick=function(){var v=document.getElementById("pName").value.trim();if(!v){toast("Escribí tu nombre para que sepa quién lo envía");return;}S.name=v;save();closeSheet();cb(v);};
+}
+function sendDoc(){
+  patientName(function(nm){
+    var ms=monthsShown(),d=new Date();
+    var L=["*Fuerza · Mejor Sin Pastillas*","Paciente: "+nm,"Enviado el "+d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear()];
+    if(S.prof)L.push("Profesional a cargo: "+S.prof);
+    L.push("Carga máxima × repeticiones de cada mes","");
+    allExIds().forEach(function(id){
+      var cells=ms.map(function(k){var b=bestIn(id,k);return b?monthLabel(k)+" "+shortMark(b,id):null;}).filter(Boolean);
+      if(cells.length)L.push("*"+exName(id)+"*: "+cells.join(" · "));
+    });
+    location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(L.join("\n"));
+  });
 }
 
 function chartSVG(id){
@@ -233,25 +336,31 @@ function chartSVG(id){
   var area="M"+x(0)+","+y(mn)+" L"+pts.split(" ").join(" L")+" L"+x(mb.length-1)+","+y(mn)+" Z";
   var dots=mb.map(function(m,i){var last=i===mb.length-1;return '<circle cx="'+x(i)+'" cy="'+y(m.l.kg)+'" r="'+(last?5:3.5)+'" fill="'+(last?"var(--green)":"var(--card)")+'" stroke="var(--green)" stroke-width="2"/><text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+monthLabel(m.k)+"</text>";}).join("");
   var lastM=mb[mb.length-1];
-  var lbl='<text x="'+Math.min(x(mb.length-1),W-pr-2)+'" y="'+(y(lastM.l.kg)-10)+'" text-anchor="end" font-size="12" font-weight="700" fill="var(--green)">'+num(lastM.l.kg)+' kg</text>';
+  var lbls=mb.map(function(m,i){return i===mb.length-1?"":'<text x="'+x(i)+'" y="'+(y(m.l.kg)-9)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+num(m.l.kg)+"×"+m.l.n+"</text>";}).join("");
+  var lbl=lbls+'<text x="'+Math.min(x(mb.length-1),W-pr-2)+'" y="'+(y(lastM.l.kg)-10)+'" text-anchor="end" font-size="12" font-weight="700" fill="var(--green)">'+num(lastM.l.kg)+" kg × "+lastM.l.n+'</text>';
   return '<div class="chart"><svg viewBox="0 0 '+W+" "+H+'" role="img" aria-label="Mejor carga de cada mes en kilos">'+g+'<path d="'+area+'" fill="var(--mint)" opacity=".7"/><polyline points="'+pts+'" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>'+dots+lbl+"</svg></div>";
 }
 
 function renderProgreso(){
+  var ms=monthsShown();
+  var h='<div class="card"><h3>Resumen</h3>';
+  var lines=[];
+  allExIds().forEach(function(id){
+    var mb=monthlyBest(id);if(mb.length<2)return;
+    var a=mb[0],b=mb[mb.length-1],diff=b.l.kg-a.l.kg,pct=a.l.kg?Math.round(diff/a.l.kg*100):null;
+    var cls=diff>0?"up":diff<0?"down":"eq";
+    lines.push('<div class="sum"><div><b>'+esc(exName(id))+'</b><div class="muted">'+monthLabel(a.k)+": "+markTxt(a.l,id)+" → "+monthLabel(b.k)+": "+markTxt(b.l,id)+'</div></div><span class="delta '+cls+'">'+(diff>0?"+":"")+num(diff)+" kg"+(pct!=null&&diff!==0?"<small>"+(diff>0?"+":"")+pct+" %</small>":"")+"</span></div>");
+  });
+  h+=lines.length?lines.join(""):'<p class="muted" style="margin:0">Cuando completes al menos dos meses, vas a ver acá cuánto progresaste en cada ejercicio.</p>';
+  h+="</div>";
   var opts="";
   PATTERNS.forEach(function(p){opts+='<optgroup label="'+p.name+'">';p.ex.forEach(function(id){opts+='<option value="'+id+'"'+(id===progEx?" selected":"")+">"+esc(exName(id))+"</option>";});opts+="</optgroup>";});
-  var mb=monthlyBest(progEx), ls=logsOf(progEx).slice().reverse();
-  var first=mb[0], last=mb[mb.length-1];
-  var summary="";
-  if(first&&last&&mb.length>1){var diff=last.l.kg-first.l.kg;summary='<p style="margin:0 0 8px"><b>'+(diff>=0?"+":"")+num(diff)+" kg</b> desde "+monthLabel(first.k)+".</p>";}
-  var h='<div class="card"><label for="exSel">Ejercicio</label><select id="exSel">'+opts+"</select></div>";
-  h+='<div class="card"><h3>Mejor marca de cada mes</h3>'+summary+chartSVG(progEx);
-  if(mb.length){h+='<table><thead><tr><th>Mes</th><th>Mejor serie</th></tr></thead><tbody>'+mb.slice().reverse().map(function(m){return "<tr><td>"+monthLabel(m.k)+"</td><td>"+markTxt(m.l,progEx)+"</td></tr>";}).join("")+"</tbody></table>";}
-  h+="</div>";
-  h+='<div class="card"><h3>Todos los registros</h3>';
-  if(!ls.length)h+='<p class="muted">Todavía no registraste este ejercicio.</p>';
-  else h+="<table><thead><tr><th>Fecha</th><th>Serie</th><th></th></tr></thead><tbody>"+ls.map(function(l){return "<tr><td>"+fmtDate(l.date)+"/"+l.date.slice(2,4)+"</td><td>"+markTxt(l,progEx)+'</td><td class="del"><button class="icon-btn" data-del="'+l.id+'">Borrar</button></td></tr>';}).join("")+"</tbody></table>";
-  h+="</div>";
+  var mb=monthlyBest(progEx);
+  h+='<div class="card"><label for="exSel">Ejercicio</label><select id="exSel" style="margin-bottom:12px">'+opts+"</select>";
+  h+='<h3>Carga máxima de cada mes</h3>'+chartSVG(progEx);
+  if(mb.length){h+='<table style="margin-top:8px"><thead><tr><th>Mes</th><th>Mejor marca</th><th></th></tr></thead><tbody>'+mb.slice().reverse().map(function(m){return "<tr><td>"+monthLabel(m.k)+"</td><td>"+markTxt(m.l,progEx)+'</td><td class="del"><button class="icon-btn" data-delm="'+progEx+"|"+m.k+'">Borrar</button></td></tr>';}).join("")+"</tbody></table>";}
+  else h+='<p class="muted">Todavía no hay marcas de este ejercicio.</p>';
+  h+='<p class="muted" style="margin:10px 0 0">Si un mes subís la carga, es normal que bajen un poco las repeticiones. Lo importante es la tendencia a lo largo de los meses.</p></div>';
   main.innerHTML=h;
   document.getElementById("exSel").onchange=function(e){progEx=e.target.value;render();};
 }
@@ -315,11 +424,11 @@ function fallbackCopy(txt){var b=document.getElementById("bkIn");b.value=txt;b.s
 
 function render(){
   document.querySelectorAll("nav button").forEach(function(b){if(b.getAttribute("data-view")===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
-  var sub={registrar:"Anotá tu serie más pesada de cada ejercicio.",progreso:"Mirá cómo crece tu fuerza mes a mes.",metas:"Tus marcas objetivo, según tu plan.",mas:"Ajustes y copia de seguridad."}[view];
+  var sub={mes:"Tu mejor marca de cada mes, como en el cuaderno.",progreso:"Cómo crece tu fuerza mes a mes.",metas:"Tus marcas objetivo, según tu plan.",mas:"Ajustes y copia de seguridad."}[view];
   document.getElementById("subtitle").textContent=sub;
-  if(view==="registrar")renderRegistrar();else if(view==="progreso")renderProgreso();else if(view==="metas")renderMetas();else renderMas();
+  if(view==="mes")renderMes();else if(view==="progreso")renderProgreso();else if(view==="metas")renderMetas();else renderMas();
   var sf=document.getElementById("startFresh");
-  if(sf)sf.onclick=function(){S=blank();save();view="registrar";render();};
+  if(sf)sf.onclick=function(){S=blank();save();view="mes";render();};
   var sd=document.getElementById("seeDemo");if(sd)sd.onclick=function(){S=demo();S.lastBackup=null;save();render();};
   var hi=document.getElementById("hideIOS");if(hi)hi.onclick=function(){S.hideIOS=true;save();render();};
   var gb=document.getElementById("goBackup");if(gb)gb.onclick=function(){view="mas";render();};
@@ -366,6 +475,8 @@ function confirmSheet(msg,label,ok){
 
 main.addEventListener("click",function(e){
   var b=e.target.closest("[data-log]");if(b){openLog(b.getAttribute("data-log"));return;}
+  var mo=e.target.closest("[data-month]");if(mo){openMonth(mo.getAttribute("data-month"));return;}
+  var dm=e.target.closest("[data-delm]");if(dm){var pr=dm.getAttribute("data-delm").split("|");confirmSheet("¿Borrar la marca de "+exName(pr[0])+" en "+monthFull(pr[1])+"?","Borrar",function(){S.logs=S.logs.filter(function(l){return !(l.ex===pr[0]&&monthKey(l.date)===pr[1]);});save();render();});return;}
   var d=e.target.closest("[data-del]");if(d){var lid=+d.getAttribute("data-del");confirmSheet("¿Borrar este registro?","Borrar",function(){S.logs=S.logs.filter(function(l){return l.id!==lid;});save();render();});}
 });
 document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){view=b.getAttribute("data-view");render();};});

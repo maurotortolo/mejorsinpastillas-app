@@ -45,16 +45,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 0 18px}
 <header>
   <a class="brand" href="../">‹ Mejor Sin Pastillas</a>
   <h1>Registro de mi entrenamiento</h1>
-  <p>Fuerza y cardio, como en las tablas del cuaderno.</p>
+  <p>Completalo al final de cada mes, como las tablas del cuaderno.</p>
 </header>
 <main>
   <a class="tool" href="../fuerza/">
     <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8v8M3.5 10v4M18 8v8M20.5 10v4M6 12h12"/></svg></span>
-    <span><b>Fuerza</b><span class="d">Tu carga más alta y tus repeticiones de cada mes, por movimiento.</span><span class="last" id="lastF"></span></span>
+    <span><b>Fuerza</b><span class="d">Cada mes, tu carga máxima y las repeticiones con esa carga en cada movimiento.</span><span class="last" id="lastF"></span></span>
   </a>
   <a class="tool" href="../cardio/">
     <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="1.8"/><path d="M7 21l3-6 3 2v5M13.5 8.5l-3 3 3 3M13.5 8.5l2.5 3 3 .5M10.5 11.5L7 12"/></svg></span>
-    <span><b>Cardio</b><span class="d">Caminata, running, bici, natación y más: tus sesiones y tu evolución mes a mes.</span><span class="last" id="lastC"></span></span>
+    <span><b>Cardio</b><span class="d">Cada mes, tus promedios de frecuencia, distancia y tiempo, y tu mejor sesión.</span><span class="last" id="lastC"></span></span>
   </a>
   <p class="note">Tus registros se guardan solo en este teléfono, no se envían a ningún lado. Esta app no reemplaza la indicación de tu médico ni de tu entrenador.</p>
 </main>
@@ -62,10 +62,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 0 18px}
 </div>
 <script>
 (function(){
-function last(key,list){try{var d=JSON.parse(localStorage.getItem(key));if(!d||d.demo)return null;var ls=d[list]||[];var m=null;ls.forEach(function(l){if(!m||l.date>m)m=l.date;});return m;}catch(e){return null;}}
-function put(id,date){if(!date)return;var p=date.split("-");document.getElementById(id).textContent="Último registro: "+p[2]+"/"+p[1];}
-put("lastF",last("msp_fuerza_v1","logs"));
-put("lastC",last("msp_cardio_v1","sessions"));
+var MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function lastF(){try{var d=JSON.parse(localStorage.getItem("msp_fuerza_v1"));if(!d||d.demo)return null;var m=null;(d.logs||[]).forEach(function(l){var k=l.date.slice(0,7);if(!m||k>m)m=k;});return m;}catch(e){return null;}}
+function lastC(){try{var d=JSON.parse(localStorage.getItem("msp_cardio_v1"));if(!d)return null;var ks=Object.keys(d.months||{}).filter(function(k){return Object.keys(d.months[k]).length;});(d.sessions||[]).forEach(function(s){ks.push(s.date.slice(0,7));});ks.sort();return ks.length?ks[ks.length-1]:null;}catch(e){return null;}}
+function put(id,k){if(!k)return;var p=k.split("-");document.getElementById(id).textContent="Último mes registrado: "+MES[+p[1]-1]+" "+p[0];}
+put("lastF",lastF());put("lastC",lastC());
 })();
 if("serviceWorker" in navigator){try{navigator.serviceWorker.register("../sw.js",{scope:"../"});}catch(e){}}
 </script>
