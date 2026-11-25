@@ -37,6 +37,8 @@ h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gree
 .ex .txt{flex:1;min-width:0}
 .ex b{display:block;font-size:17px}
 .ex small{color:var(--muted);font-size:13px;display:block}
+.ex small.lee{color:var(--green);font-size:14px;font-weight:700;margin-top:1px}
+header p.lee{opacity:1;font-weight:700;font-size:15px}
 .score{flex:none;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;font-size:15px;text-align:right}
 .score span{display:block;font-weight:400;color:var(--muted);font-size:12px}
 .prog{height:6px;border-radius:4px;background:var(--line);overflow:hidden}
@@ -108,7 +110,7 @@ function list(){
   EX.forEach(function(e){
     if(e.part!==part){part=e.part;h+="<h2>"+esc(part)+"</h2>";}
     var r=S.r[e.n];
-    h+='<button class="ex" data-ex="'+e.n+'"><span class="n">'+e.n+'</span><span class="txt"><b>'+esc(e.title)+"</b><small>"+e.q.length+" preguntas · "+esc(e.caps||"")+"</small></span>"+(r?'<span class="score">'+r.best+"/"+e.q.length+"<span>"+(r.tries>1?"mejor resultado":"hecho el "+fecha(r.date))+"</span></span>":"")+"</button>";
+    h+='<button class="ex" data-ex="'+e.n+'"><span class="n">'+e.n+'</span><span class="txt"><b>'+esc(e.title)+"</b><small class=\"lee\">Antes, leé: "+esc(e.caps||"")+"</small><small>"+e.q.length+" preguntas</small></span>"+(r?'<span class="score">'+r.best+"/"+e.q.length+"<span>"+(r.tries>1?"mejor resultado":"hecho el "+fecha(r.date))+"</span></span>":"")+"</button>";
   });
   if(Object.keys(S.r).length){
     h+='<div class="card"><h3>Enviar resultados a mi médico</h3><p class="muted" style="margin:0 0 10px">Se abre WhatsApp con el resumen listo para enviar al Dr. Mauro Tortolo. Vos decidís si lo mandás.</p>'+
@@ -125,7 +127,7 @@ function list(){
   var r=document.getElementById("reset");if(r)r.onclick=function(){if(r.dataset.c){S={v:1,r:{},name:S.name};save();list();}else{r.dataset.c=1;r.textContent="Tocá de nuevo para confirmar";}};
 }
 function start(n){cur=EX[n-1];qi=0;answers=[];question();}
-function header(){hdr.innerHTML='<button class="back" id="back">‹ Mini exámenes</button><h1>'+cur.n+". "+esc(cur.title)+"</h1><p>"+esc(cur.part)+"</p>";document.getElementById("back").onclick=list;}
+function header(){hdr.innerHTML='<button class="back" id="back">‹ Mini exámenes</button><h1>'+cur.n+". "+esc(cur.title)+"</h1><p class=\"lee\">Antes, leé: "+esc(cur.caps||"")+"</p><p>"+esc(cur.part)+"</p>";document.getElementById("back").onclick=list;}
 function question(){
   header();
   var q=cur.q[qi],n=cur.q.length;
