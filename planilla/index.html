@@ -53,7 +53,6 @@ nav button[aria-current="page"]{color:var(--navy);font-weight:700}
 .group h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin:0 0 8px}
 .rows{display:flex;flex-direction:column;gap:8px}
 .row{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.row.prio{border-color:var(--green);box-shadow:inset 4px 0 0 var(--green)}
 .row .top{display:flex;align-items:center;gap:10px}
 .row .name{flex:1;font-weight:700}
 .row .name small{display:block;font-weight:400;color:var(--muted);font-size:13px}
@@ -86,7 +85,6 @@ table.week th:first-child,table.week td:first-child{text-align:left;position:sti
 table.week thead th{font-size:12px;color:var(--muted)}
 table.week td.sum{font-weight:700;color:var(--green)}
 table.week tr.pil td{background:var(--bg);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;text-align:left}
-table.week tr.prio td:first-child{box-shadow:inset 4px 0 0 var(--green);font-weight:700}
 table.week td.ok{color:var(--green);font-weight:700}
 .chart svg{width:100%;height:auto;display:block}
 .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
@@ -129,8 +127,7 @@ var PILARES=[
  {id:"nut",name:"Nutrición apropiada",rows:[
    {id:"qc",label:"Qué comer",hint:"¿Cuánto cumpliste? (%)",t:"pct"},
    {id:"pb",label:"Primer bocado",hint:"Horario",t:"time"},
-   {id:"ub",label:"Último bocado",hint:"Horario",t:"time",late:true},
-   {id:"sac",label:"Cuánto comer",hint:"Según tu saciedad",t:"sat"}]},
+   {id:"ub",label:"Último bocado",hint:"Horario",t:"time",late:true}]},
  {id:"fis",name:"Entrenamiento físico",rows:[
    {id:"e1",label:"Ejercicio 1",t:"check",act:"fis"},
    {id:"e2",label:"Ejercicio 2",t:"check",act:"fis"},
@@ -141,17 +138,11 @@ var PILARES=[
    {id:"m2",label:"Mental 2",t:"check",act:"men"},
    {id:"m3",label:"Mental 3",t:"check",act:"men"}]},
  {id:"nat",name:"Conexión natural",rows:[
-   {id:"pant",label:"Tiempo de pantalla",hint:"Horas, según el celular",t:"num",step:0.5,unit:"h"},
    {id:"apag",label:"Apagado de pantallas",hint:"Hora",t:"time",late:true},
    {id:"acos",label:"Me acosté",hint:"Hora",t:"time",late:true},
    {id:"lev",label:"Me levanté",hint:"Hora",t:"time"},
    {id:"sue",label:"Calidad del sueño",hint:"1 a 10",t:"scale"},
-   {id:"sol",label:"Exposición al sol",hint:"Minutos",t:"num",step:5,unit:"min"}]},
- {id:"soc",name:"Conexión social",rows:[
-   {id:"ba",label:"Una buena acción",t:"check"},
-   {id:"tc",label:"Tiempo de calidad / escucha de verdad",t:"check"}]},
- {id:"est",name:"Cómo estás",rows:[
-   {id:"en",label:"Energía y ánimo",hint:"1 a 10",t:"scale"}]}
+   {id:"sol",label:"Exposición al sol",hint:"Minutos",t:"num",step:5,unit:"min"}]}
 ];
 var ROWS={};PILARES.forEach(function(p){p.rows.forEach(function(r){r.pil=p.id;ROWS[r.id]=r;});});
 var ACTS=[["fuerza","Entrenamiento de fuerza","Fuerza"],["caminata","Caminata","Caminata"],["running","Running","Running"],["ciclismo","Ciclismo","Bici"],["spinning","Spinning","Spinning"],["natacion","Natación","Natación"],["deporte","Deporte","Deporte"],["yoga","Yoga, pilates o movilidad","Yoga"],["otro","Otro","Otro"]];
@@ -179,7 +170,7 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return
 function tmin(t,late){if(!t)return null;var p=t.split(":");var m=(+p[0])*60+(+p[1]);if(late&&m<12*60)m+=1440;return m;}
 function mstr(m){m=Math.round(m)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");}
 
-function blank(){return {v:1,d:{},w:{},names:{},lastAct:{},lastTxt:{},soloPrio:false};}
+function blank(){return {v:1,d:{},w:{},names:{},lastAct:{},lastTxt:{}};}
 function migrate(x){if(!x||typeof x!=="object")return blank();if(!x.v)x.v=1;if(!x.d)x.d={};if(!x.w)x.w={};if(!x.names)x.names={};if(!x.lastAct){x.lastAct={};x.lastTxt={};["e1","e2","e3"].forEach(function(k){if(x.names[k]){x.lastAct[k]="otro";x.lastTxt[k]=x.names[k];}});}if(!x.lastTxt)x.lastTxt={};["m2","m3"].forEach(function(k){if(x.names[k]&&!x.lastAct[k])nameToAct(x,k,x.names[k]);});return x;}
 var S;
 try{var raw=localStorage.getItem(KEY);S=raw?migrate(JSON.parse(raw)):blank();}catch(e){S=blank();}
@@ -196,18 +187,15 @@ function demo(){
     var k=i/41, e={};
     e.qc=[50,75,75,100,75][Math.floor(rnd()*5)]; if(k<0.3&&rnd()<0.5)e.qc=50;
     e.pb=(rnd()<0.5?"10:":"11:")+(rnd()<0.5?"00":"30"); e.ub=(rnd()<0.6?"20:":"21:")+(rnd()<0.5?"00":"30");
-    e.sac=rnd()<0.7?"=":(rnd()<0.5?"+":"-");
     if(dow(day)%2===0&&rnd()<0.6+k*0.3){e.e1=true;e.e1a="fuerza";} if(rnd()<0.4+k*0.3){e.e2=true;e.e2a=rnd()<0.7?"caminata":"ciclismo";}
     e.pasos=Math.round((5000+k*3000+rnd()*3000)/500)*500;
     e.med=rnd()<0.4+k*0.4?(10+Math.round(rnd()*2)*5):0; if(rnd()<0.5){e.m2=true;e.m2a="diario";} if(rnd()<0.25+k*0.2){e.m3=true;e.m3a="oracion";}
-    e.pant=Math.round((5-k*2+rnd()*1.5)*2)/2; e.apag=(rnd()<0.5?"22:":"23:")+(rnd()<0.5?"00":"30");
+    e.apag=(rnd()<0.5?"22:":"23:")+(rnd()<0.5?"00":"30");
     e.acos=(rnd()<0.6?"23:":"00:")+(rnd()<0.5?"00":"30"); e.lev=(rnd()<0.5?"07:":"07:")+(rnd()<0.5?"00":"30");
     e.sue=Math.min(10,Math.round(5+k*2+rnd()*2)); e.sol=Math.round((10+k*15+rnd()*10)/5)*5;
-    if(rnd()<0.5)e.ba=true; if(rnd()<0.5+k*0.2)e.tc=true;
-    e.en=Math.min(10,Math.round(5+k*2.5+rnd()*1.5));
     x.d[day]=e;
   }
-  for(var w=0;w<6;w++){var m=addDays(start,w*7);x.w[m]={prio:w<3?["qc","sue"]:["qc","e1"],para:"Para tener energía para jugar con mis hijos",peso:Math.round((84-w*0.6)*10)/10,cint:Math.round((98-w*0.8)*2)/2};}
+  for(var w=0;w<6;w++){var m=addDays(start,w*7);x.w[m]={peso:Math.round((84-w*0.6)*10)/10,cint:Math.round((98-w*0.8)*2)/2};}
   return x;
 }
 
@@ -215,12 +203,12 @@ var toastT;
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2400);}
 function rname(r){if(r.act){var a=S.lastAct&&S.lastAct[r.id];return a?(a==="otro"&&S.lastTxt[r.id]?S.lastTxt[r.id]:actL(a,1,r.act)):r.label;}return (r.named&&S.names[r.id])?S.names[r.id]:r.label;}
 function dayAct(d,id){var e=dayQ(d);return e[id+"a"]||null;}
-function week(m){if(!S.w[m])S.w[m]={prio:[],para:""};return S.w[m];}
-function weekQ(m){return S.w[m]||{prio:[],para:""};}
+function week(m){if(!S.w[m])S.w[m]={};return S.w[m];}
+function weekQ(m){return S.w[m]||{};}
 function dayQ(d){return S.d[d]||{};}
 function setVal(d,id,v){if(S.demo){S=blank();}if(!S.d[d])S.d[d]={};if(v===null||v===undefined||v===""||v===false)delete S.d[d][id];else S.d[d][id]=v;save();}
 
-var view="hoy", curDay=today(), curWeek=monday(today()), evoRow="en";
+var view="hoy", curDay=today(), curWeek=monday(today()), evoRow="tot";
 var main=document.getElementById("main");
 
 /* Avisos (iPhone, copia de seguridad, bienvenida/ejemplo) */
@@ -231,7 +219,7 @@ function notices(){
   if(S.demo)return '<div class="banner"><div><b>Estás viendo un ejemplo</b> de seis semanas. Cuando anotes tu primer dato real, el ejemplo se borra solo.</div><div><button class="btn" id="exitDemo">Salir del ejemplo</button></div></div>';
   if(isIOS()&&!standalone()&&!S.hideIOS)h+='<div class="banner"><div><b>Instalala en tu iPhone.</b> Tocá Compartir en Safari y elegí <b>Agregar a pantalla de inicio</b>. Si no la instalás, el iPhone puede borrar tus registros cuando pasan unos días sin usarla.</div><div><button class="btn ghost" id="hideIOS">Entendido</button></div></div>';
   var n=Object.keys(S.d).length;
-  if(!n)h+='<div class="banner"><div><b>¡Bienvenido!</b> Anotá lo que hiciste hoy. No hace falta completar todo: empezá por tus prioridades. ¿Querés ver cómo se ve la planilla después de unas semanas?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>';
+  if(!n)h+='<div class="banner"><div><b>¡Bienvenido!</b> Anotá lo que hiciste hoy. No hace falta completar todo: empezá por lo que te resulte más fácil. ¿Querés ver cómo se ve la planilla después de unas semanas?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>';
   else if(n>=10){var lb=S.lastBackup?new Date(S.lastBackup):null;if(!lb||(Date.now()-lb.getTime())/864e5>30)h+='<div class="banner"><div><b>Hacé una copia de seguridad.</b> '+(lb?"Pasó más de un mes desde la última.":"Todavía no hiciste ninguna.")+' Te permite recuperar tus registros si cambiás de teléfono.</div><div><button class="btn" id="goBackup">Hacer copia ahora</button></div></div>';}
   return h;
 }
@@ -256,49 +244,32 @@ function actControl(r,d){
   return h;
 }
 function renderHoy(){
-  var d=curDay, m=monday(d), w=weekQ(m), prio=w.prio||[];
+  var d=curDay, m=monday(d);
   var h=notices();
   h+='<div class="daynav"><button id="prevDay" aria-label="Día anterior">‹</button><div class="lbl"><b>'+(d===today()?"Hoy":DIAS_L[dow(d)].replace(/^./,function(c){return c.toUpperCase();}))+'</b><span class="muted">'+DIAS_L[dow(d)]+" "+shortDate(d)+'</span></div><button id="nextDay" aria-label="Día siguiente"'+(d>=today()?" disabled":"")+'>›</button></div>';
-  if(!prio.length)h+='<div class="card"><h3>Tus prioridades de esta semana</h3><p class="muted" style="margin:0 0 10px">Elegí uno o dos hábitos para enfocarte esta semana. Los demás, si querés.</p><button class="btn sec" id="pickPrio">Elegir prioridades</button></div>';
-  else h+='<div class="card"><div class="muted">Prioridades de la semana</div><div style="font-weight:700;margin:2px 0 4px">'+prio.map(function(id){return esc(rname(ROWS[id]));}).join(" · ")+'</div>'+(w.para?'<div class="muted">Para qué: '+esc(w.para)+"</div>":"")+'<div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="pickPrio">Cambiar</button></div><label class="toggle" style="margin-top:10px"><input type="checkbox" id="soloPrio"'+(S.soloPrio?" checked":"")+'> Mostrar solo mis prioridades</label></div>';
   PILARES.forEach(function(p){
-    var rows=p.rows.filter(function(r){return !S.soloPrio||!prio.length||prio.indexOf(r.id)>=0;});
-    if(!rows.length&&!(p.id==="est"&&!S.soloPrio))return;
     h+='<section class="group"><h2>'+p.name+'</h2><div class="rows">';
-    rows.forEach(function(r){
-      var v=dayQ(d)[r.id], isP=prio.indexOf(r.id)>=0;
-      h+='<div class="row'+(isP?" prio":"")+'"><div class="top"><div class="name">'+esc(r.act?r.label:rname(r))+(isP?'<span class="chip">Prioridad</span>':"")+(r.hint?"<small>"+r.hint+"</small>":"")+"</div>";
+    p.rows.forEach(function(r){
+      var v=dayQ(d)[r.id];
+      h+='<div class="row"><div class="top"><div class="name">'+esc(r.act?r.label:rname(r))+(r.hint?"<small>"+r.hint+"</small>":"")+"</div>";
       if(r.t==="check")h+='<button class="check" data-toggle="'+r.id+'" aria-pressed="'+(v===true)+'" aria-label="'+esc(rname(r))+'">✓</button>';
       h+="</div>"+(r.act?actControl(r,d):"")+control(r,d)+"</div>";
     });
-    if(p.id==="est"&&!S.soloPrio){
-      var wq=weekQ(m);
-      h+='<div class="row"><div class="name">Peso y cintura<small>Una vez por semana, en ayunas</small></div><div class="btnrow">'+WEEKLY.map(function(x){return '<div><label for="wk_'+x.id+'">'+x.label+" ("+x.unit+')</label><input type="number" inputmode="decimal" step="'+x.step+'" id="wk_'+x.id+'" data-week="'+x.id+'" value="'+(wq[x.id]==null?"":wq[x.id])+'"></div>';}).join("")+"</div></div>";
-    }
     h+="</div></section>";
   });
+  var wq=weekQ(m);
+  h+='<section class="group"><h2>Una vez por semana</h2><div class="rows"><div class="row"><div class="name">Peso y cintura<small>En ayunas</small></div><div class="btnrow">'+WEEKLY.map(function(x){return '<div><label for="wk_'+x.id+'">'+x.label+" ("+x.unit+')</label><input type="number" inputmode="decimal" step="'+x.step+'" id="wk_'+x.id+'" data-week="'+x.id+'" value="'+(wq[x.id]==null?"":wq[x.id])+'"></div>';}).join("")+"</div></div></div></section>";
   h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
   document.getElementById("prevDay").onclick=function(){curDay=addDays(curDay,-1);render();};
   document.getElementById("nextDay").onclick=function(){if(curDay<today()){curDay=addDays(curDay,1);render();}};
-  var sp=document.getElementById("soloPrio");if(sp)sp.onchange=function(){S.soloPrio=sp.checked;save();render();};
 }
 
-/* ---------- PRIORIDADES ---------- */
+/* ---------- HOJA INFERIOR (confirmaciones) ---------- */
 var sheetBg=document.getElementById("sheetBg"),sheet=document.getElementById("sheet");
 function closeSheet(){sheetBg.classList.remove("open");}
 sheetBg.addEventListener("click",function(e){if(e.target===sheetBg)closeSheet();});
 document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSheet();});
-function openPrio(m){
-  var w=weekQ(m), sel=(w.prio||[]).slice();
-  var h='<h3 id="sheetTitle">Prioridades de la semana</h3><p class="muted" style="margin:0">Semana del '+shortDate(m)+" al "+shortDate(addDays(m,6))+'. Elegí uno o dos hábitos.</p>';
-  PILARES.forEach(function(p){h+='<div><div class="muted" style="font-weight:700;margin-bottom:4px">'+p.name+'</div><div class="seg">'+p.rows.map(function(r){return '<button data-pr="'+r.id+'" aria-pressed="'+(sel.indexOf(r.id)>=0)+'">'+esc(rname(r))+"</button>";}).join("")+"</div></div>";});
-  h+='<div><label for="para">¿Para qué lo hago?</label><input type="text" id="para" value="'+esc(w.para||"")+'" placeholder="Por ejemplo, para tener energía para mis hijos"></div><div class="btnrow"><button class="btn ghost" id="prCancel">Cancelar</button><button class="btn" id="prSave">Guardar</button></div>';
-  sheet.innerHTML=h;sheetBg.classList.add("open");
-  sheet.querySelectorAll("[data-pr]").forEach(function(b){b.onclick=function(){var id=b.getAttribute("data-pr"),i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else{if(sel.length>=2){toast("Mejor uno o dos: primero los elefantes");return;}sel.push(id);}b.setAttribute("aria-pressed",sel.indexOf(id)>=0);};});
-  document.getElementById("prCancel").onclick=closeSheet;
-  document.getElementById("prSave").onclick=function(){if(S.demo)S=blank();var ww=week(m);ww.prio=sel;ww.para=document.getElementById("para").value.trim();save();closeSheet();render();toast("Prioridades guardadas");};
-}
 
 /* ---------- SEMANA ---------- */
 function rowSummary(r,vals){
@@ -322,16 +293,15 @@ function cellTxt(r,v,d){
   return String(v).replace(".",",");
 }
 function renderSemana(){
-  var m=curWeek, w=weekQ(m), prio=w.prio||[];
+  var m=curWeek, w=weekQ(m);
   var days=[0,1,2,3,4,5,6].map(function(i){return addDays(m,i);});
   var h=(S.demo?notices():"")+'<div class="daynav"><button id="prevW" aria-label="Semana anterior">‹</button><div class="lbl"><b>Semana del '+shortDate(m)+'</b><span class="muted">al '+shortDate(addDays(m,6))+'</span></div><button id="nextW" aria-label="Semana siguiente"'+(m>=monday(today())?" disabled":"")+">›</button></div>";
-  h+='<div class="card"><div class="muted">Mis prioridades</div><div style="font-weight:700">'+(prio.length?prio.map(function(id){return esc(rname(ROWS[id]));}).join(" · "):"Sin elegir")+"</div>"+(w.para?'<div class="muted">¿Para qué lo hago? '+esc(w.para)+"</div>":"")+'<div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="pickPrioW">'+(prio.length?"Cambiar":"Elegir prioridades")+"</button></div></div>";
   h+='<div class="tablewrap"><table class="week"><thead><tr><th>Hábito</th>'+days.map(function(d,i){return "<th>"+DIAS[i]+"<br>"+pd(d).getDate()+"</th>";}).join("")+"<th>Semana</th></tr></thead><tbody>";
   PILARES.forEach(function(p){
     h+='<tr class="pil"><td colspan="9">'+p.name+"</td></tr>";
     p.rows.forEach(function(r){
       var vals=days.map(function(d){return dayQ(d)[r.id];});var s=rowSummary(r,vals);
-      h+='<tr class="'+(prio.indexOf(r.id)>=0?"prio":"")+'"><td>'+esc(r.act?r.label:rname(r))+"</td>"+vals.map(function(v,i){return '<td class="'+(r.t==="check"&&v?"ok":"")+'">'+cellTxt(r,v,days[i])+"</td>";}).join("")+'<td class="sum">'+s.txt+"</td></tr>";
+      h+='<tr><td>'+esc(r.act?r.label:rname(r))+"</td>"+vals.map(function(v,i){return '<td class="'+(r.t==="check"&&v?"ok":"")+'">'+cellTxt(r,v,days[i])+"</td>";}).join("")+'<td class="sum">'+s.txt+"</td></tr>";
     });
   });
   h+='<tr class="pil"><td colspan="9">Una vez por semana</td></tr>'+WEEKLY.map(function(x){return "<tr><td>"+x.label+" ("+x.unit+')</td><td colspan="7"></td><td class="sum">'+(w[x.id]==null?"":String(w[x.id]).replace(".",","))+"</td></tr>";}).join("");
@@ -340,7 +310,6 @@ function renderSemana(){
   main.innerHTML=h;
   document.getElementById("prevW").onclick=function(){curWeek=addDays(curWeek,-7);render();};
   document.getElementById("nextW").onclick=function(){if(curWeek<monday(today())){curWeek=addDays(curWeek,7);render();}};
-  document.getElementById("pickPrioW").onclick=function(){openPrio(m);};
   main.querySelectorAll("[data-cierre]").forEach(function(t){t.onchange=function(){if(S.demo)S=blank();week(m)[t.getAttribute("data-cierre")]=t.value.trim();save();toast("Guardado");};});
 }
 
@@ -382,15 +351,14 @@ function renderEvolucion(){
   var opts="";PILARES.forEach(function(p){opts+='<optgroup label="'+p.name+'">'+p.rows.map(function(r){return '<option value="'+r.id+'"'+(r.id===evoRow?" selected":"")+">"+esc(rname(r))+"</option>";}).join("")+"</optgroup>";});
   opts='<optgroup label="Entrenamiento (resumen)">'+Object.keys(SPECIAL).map(function(k){return '<option value="'+k+'"'+(k===evoRow?" selected":"")+">"+SPECIAL[k]+"</option>";}).join("")+"</optgroup>"+opts;
   opts+='<optgroup label="Una vez por semana">'+WEEKLY.map(function(x){return '<option value="'+x.id+'"'+(x.id===evoRow?" selected":"")+">"+x.label+" ("+x.unit+")</option>";}).join("")+"</optgroup>";
-  var s=weeklySeries(evoRow), en=evoRow!=="en"?weeklySeries("en"):null;
+  var s=weeklySeries(evoRow);
   var pts=s.filter(function(p){return p.v!=null;});
   var r=ROWS[evoRow]||(SPECIAL[evoRow]?{t:"check",label:SPECIAL[evoRow]}:null);
-  var what=r?(r.t==="check"?"días por semana":r.t==="time"?"horario promedio de cada semana":r.t==="sat"?"porcentaje de días que comiste según tu saciedad (=)":"promedio de cada semana"):"valor de cada semana";
+  var what=r?(r.t==="check"?"días por semana":r.t==="time"?"horario promedio de cada semana":"promedio de cada semana"):"valor de cada semana";
   var h=(S.demo?notices():"")+'<div class="card"><label for="evoSel">Hábito</label><select id="evoSel">'+opts+"</select></div>";
   h+='<div class="card"><h3>'+esc(r?rname(r):WEEKLY.filter(function(x){return x.id===evoRow;})[0].label)+'</h3><p class="muted" style="margin:0 0 8px">Semanas completas · '+what+". La semana en curso se suma cuando termina.</p>";
   if(pts.length>=2){var a=pts[0],b=pts[pts.length-1];h+='<p style="margin:0 0 8px">Primera semana: <b>'+fmtVal(evoRow,a.v)+"</b> · Última: <b>"+fmtVal(evoRow,b.v)+"</b></p>";}
-  h+=chart(s,evoRow,en&&en.some(function(p){return p.v!=null;})?en:null);
-  if(en)h+='<div class="legend"><span><i style="background:var(--green)"></i>'+esc(r?rname(r):"Valor")+'</span><span><i style="background:var(--navy);opacity:.7"></i>Energía y ánimo (escala de 1 a 10)</span></div><p class="muted" style="margin:8px 0 0">La línea punteada te ayuda a ver si las semanas en que cumplís este hábito también te sentís mejor.</p>';
+  h+=chart(s,evoRow);
   h+="</div>";
   main.innerHTML=h;
   document.getElementById("evoSel").onchange=function(e){evoRow=e.target.value;render();};
@@ -429,7 +397,6 @@ main.addEventListener("click",function(e){
   if((id=t.getAttribute("data-set"))){var r=ROWS[id];var v=t.getAttribute("data-v");v=(r.t==="sat")?v:+v;var same=dayQ(curDay)[id]===v;setVal(curDay,id,same?null:v);rerender();return;}
   if((id=t.getAttribute("data-step"))){var inp=document.getElementById("in_"+id);var nv=Math.max(0,Math.round(((parseFloat(String(inp.value).replace(",","."))||0)+parseFloat(t.getAttribute("data-d")))*10)/10);setVal(curDay,id,nv);rerender();return;}
   if((id=t.getAttribute("data-clear"))){setVal(curDay,id,null);rerender();return;}
-  if(t.id==="pickPrio"){openPrio(monday(curDay));return;}
   if(t.id==="seeDemo"){S=demo();save();render();return;}
   if(t.id==="exitDemo"){S=blank();save();render();return;}
   if(t.id==="hideIOS"){S.hideIOS=true;save();render();return;}
