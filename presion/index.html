@@ -364,14 +364,14 @@ function renderEvolucion(){
   main.innerHTML=h;
   main.querySelectorAll("[data-mode]").forEach(function(b){b.onclick=function(){evoMode=b.getAttribute("data-mode");render();};});
 }
-/* Si la persona registra su peso en la planilla semanal, se muestran juntos: es el efecto de los hábitos en la presión. */
+/* Si la persona registra su peso en La salud de mi día, se muestran juntos: es el efecto de los hábitos en la presión. */
 function pesoCard(wk){
   var P;try{P=JSON.parse(localStorage.getItem("msp_planilla_v1"));}catch(e){P=null;}
   if(S.demo||!P||P.demo||!P.w||wk.length<2)return "";
   var both=wk.filter(function(w){return P.w[w.k]&&P.w[w.k].peso!=null&&P.w[w.k].peso!=="";});
   if(both.length<2)return "";
   var a=both[0],b=both[both.length-1],pa=+P.w[a.k].peso,pb=+P.w[b.k].peso,dp=Math.round((pb-pa)*10)/10,dsis=Math.round(b.s)-Math.round(a.s);
-  return '<div class="card"><h3>Tu presión y tu peso</h3><p class="muted" style="margin:0 0 6px">Semana del '+shortDate(a.k)+" → semana del "+shortDate(b.k)+' (peso de tu planilla semanal)</p>'+
+  return '<div class="card"><h3>Tu presión y tu peso</h3><p class="muted" style="margin:0 0 6px">Semana del '+shortDate(a.k)+" → semana del "+shortDate(b.k)+' (peso de La salud de mi día)</p>'+
     '<div class="sum"><b>Peso</b><span class="delta '+(dp<0?"up":dp>0?"down":"eq")+'">'+String(pa).replace(".",",")+" → "+String(pb).replace(".",",")+" kg</span></div>"+
     '<div class="sum"><b>Máxima</b><span class="delta '+(dsis<0?"up":dsis>0?"down":"eq")+'">'+Math.round(a.s)+" → "+Math.round(b.s)+"</span></div>"+
     '<p class="muted" style="margin:8px 0 0">Como vimos en el libro, por cada kilo de grasa que se pierde, la presión baja, en promedio, alrededor de 1 mmHg.</p></div>';

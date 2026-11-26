@@ -8,8 +8,8 @@
 <link rel="icon" href="../icons/icon-192.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mi planilla">
-<title>Mi planilla semanal</title>
+<meta name="apple-mobile-web-app-title" content="Mi día">
+<title>La salud de mi día</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
@@ -104,13 +104,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:4px 0 8px}
 <div class="app">
   <header>
     <a class="brand" href="../">‹ Mejor Sin Pastillas</a>
-    <h1>Mi planilla semanal</h1>
+    <h1 id="title">La salud de mi día</h1>
     <p id="subtitle">Tus hábitos de cada día.</p>
   </header>
   <main id="main"></main>
   <nav aria-label="Secciones">
-    <button data-view="hoy" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12l4 4 10-10"/></svg>Hoy</button>
-    <button data-view="semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M9 5v15M15 5v15"/></svg>Semana</button>
+    <button data-view="hoy" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12l4 4 10-10"/></svg>Mi día</button>
+    <button data-view="semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M9 5v15M15 5v15"/></svg>Mi semana</button>
     <button data-view="evolucion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M5 15l4-4 4 3 6-7"/></svg>Evolución</button>
     <button data-view="mas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Más</button>
   </nav>
@@ -227,7 +227,7 @@ function notices(){
   if(S.demo)return '<div class="banner"><div><b>Estás viendo un ejemplo</b> de seis semanas. Cuando anotes tu primer dato real, el ejemplo se borra solo.</div><div><button class="btn" id="exitDemo">Salir del ejemplo</button></div></div>';
   if(isIOS()&&!standalone()&&!S.hideIOS)h+='<div class="banner"><div><b>Instalala en tu iPhone.</b> Tocá Compartir en Safari y elegí <b>Agregar a pantalla de inicio</b>. Si no la instalás, el iPhone puede borrar tus registros cuando pasan unos días sin usarla.</div><div><button class="btn ghost" id="hideIOS">Entendido</button></div></div>';
   var n=Object.keys(S.d).length;
-  if(!n)h+='<div class="banner"><div><b>¡Bienvenido!</b> Anotá lo que hiciste hoy. No hace falta completar todo: empezá por lo que te resulte más fácil. ¿Querés ver cómo se ve la planilla después de unas semanas?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>';
+  if(!n)h+='<div class="banner"><div><b>¡Bienvenido!</b> Anotá lo que hiciste hoy. No hace falta completar todo: empezá por lo que te resulte más fácil. ¿Querés ver cómo se ve tu registro después de unas semanas?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>';
   else if(n>=10){var lb=S.lastBackup?new Date(S.lastBackup):null;if(!lb||(Date.now()-lb.getTime())/864e5>30)h+='<div class="banner"><div><b>Hacé una copia de seguridad.</b> '+(lb?"Pasó más de un mes desde la última.":"Todavía no hiciste ninguna.")+' Te permite recuperar tus registros si cambiás de teléfono.</div><div><button class="btn" id="goBackup">Hacer copia ahora</button></div></div>';}
   return h;
 }
@@ -313,7 +313,7 @@ function renderSemana(){
     });
   });
   h+='<tr class="pil"><td colspan="9">Una vez por semana</td></tr>'+WEEKLY.map(function(x){return "<tr><td>"+x.label+" ("+x.unit+')</td><td colspan="7"></td><td class="sum">'+(w[x.id]==null?"":String(w[x.id]).replace(".",","))+"</td></tr>";}).join("");
-  h+="</tbody></table></div><p class=\"muted\" style=\"margin:0\">Tocá un día en la pestaña Hoy para completarlo o corregirlo. En la columna Semana ves el total (por ejemplo, 5/7) o el promedio.</p>";
+  h+="</tbody></table></div><p class=\"muted\" style=\"margin:0\">Tocá un día en la pestaña Mi día para completarlo o corregirlo. En la columna Semana ves el total (por ejemplo, 5/7) o el promedio.</p>";
   h+='<div class="card"><h3>Cierre de la semana</h3>'+[["ok","¿Qué me funcionó?"],["obs","¿Qué obstáculo apareció?"],["aj","¿Qué ajusto para la semana que viene?"]].map(function(q){return '<label for="c_'+q[0]+'" style="margin-top:8px">'+q[1]+'</label><textarea id="c_'+q[0]+'" data-cierre="'+q[0]+'" rows="2">'+esc(w[q[0]]||"")+"</textarea>";}).join("")+"</div>";
   main.innerHTML=h;
   document.getElementById("prevW").onclick=function(){curWeek=addDays(curWeek,-7);render();};
@@ -384,20 +384,20 @@ function renderMas(){
   var h='';
   h+='<div class="card"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px">Tus registros se guardan solo en este teléfono. Una vez por mes, guardá una copia, por ejemplo mandándotela por WhatsApp o guardándola en Drive.</p><div class="btnrow"><button class="btn" id="bkFile">Guardar copia de seguridad</button></div><div class="btnrow" style="margin-top:8px"><button class="btn sec" id="bkCopy">Copiar como texto</button></div><label for="bkUp" style="margin-top:12px">Para recuperar tus datos, elegí el archivo de tu copia</label><input id="bkUp" type="file" accept=".json,application/json,text/plain"><label for="bkIn" style="margin-top:12px">O pegá acá la copia en texto</label><textarea id="bkIn" rows="3"></textarea><div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="bkLoad">Recuperar datos</button></div></div>';
   h+='<div class="card"><h3>Antes de empezar</h3><p class="muted" style="margin:0">Esta app es una ayuda para registrar tus hábitos y no reemplaza la indicación de tu médico. Si tomás medicación para la presión o la diabetes, no la modifiques por tu cuenta. Si tenés antecedentes de un trastorno de la conducta alimentaria, consultá con tu profesional antes de registrar peso, cintura o comidas.</p></div>';
-  h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros de la planilla en este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div><footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
+  h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros diarios en este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div><footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
   function backupDone(){S.lastBackup=new Date().toISOString();save();}
   function restoreObj(d){d=migrate(d);confirmSheet("¿Reemplazar tus datos actuales por los de la copia de seguridad?","Recuperar",function(){S=d;S.demo=false;save();render();toast("Datos recuperados");});}
   document.getElementById("bkFile").onclick=function(){
     var data=JSON.stringify({app:"msp-planilla",fecha:today(),datos:S}),name="mi-planilla-copia-"+today()+".json";
-    try{var file=new File([data],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · Mi planilla"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}}catch(e){}
+    try{var file=new File([data],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · La salud de mi día"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}}catch(e){}
     try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();backupDone();toast("Copia descargada");}catch(e){toast("No se pudo guardar el archivo. Probá con Copiar como texto.");}
   };
   document.getElementById("bkCopy").onclick=function(){var txt="MSPPLANILLA:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))));try{navigator.clipboard.writeText(txt).then(function(){backupDone();toast("Copia copiada: pegala en un chat o una nota");},function(){fb(txt);});}catch(e){fb(txt);}};
   function fb(txt){var b=document.getElementById("bkIn");b.value=txt;b.select();toast("Seleccioné la copia en el recuadro: copiala a mano");}
   document.getElementById("bkUp").onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var o=JSON.parse(rd.result);var d=o.datos||o;if(!d.d)throw 0;restoreObj(d);}catch(err){toast("Ese archivo no es una copia válida de la planilla.");}};rd.readAsText(f);};
   document.getElementById("bkLoad").onclick=function(){var v=document.getElementById("bkIn").value.trim();try{if(v.indexOf("MSPPLANILLA:")!==0)throw 0;var d=JSON.parse(decodeURIComponent(escape(atob(v.slice(12)))));if(!d.d)throw 0;restoreObj(d);}catch(e){toast("Esa copia no es válida. Revisá que la hayas pegado completa.");}};
-  document.getElementById("wipe").onclick=function(){confirmSheet("¿Seguro que querés borrar todos tus registros de la planilla? No se puede deshacer.","Borrar todo",function(){S=blank();save();render();toast("Datos borrados");});};
+  document.getElementById("wipe").onclick=function(){confirmSheet("¿Seguro que querés borrar todos tus registros diarios? No se puede deshacer.","Borrar todo",function(){S=blank();save();render();toast("Datos borrados");});};
 }
 function confirmSheet(msg,label,ok){
   sheet.innerHTML='<h3 id="sheetTitle">'+esc(label)+'</h3><p style="margin:0">'+esc(msg)+'</p><div class="btnrow"><button class="btn ghost" id="cfNo">Cancelar</button><button class="btn" id="cfYes">'+esc(label)+"</button></div>";
@@ -431,7 +431,8 @@ main.addEventListener("change",function(e){
 function rerender(){var st=main.scrollTop;render();main.scrollTop=st;}
 function render(){
   document.querySelectorAll("nav button").forEach(function(b){if(b.getAttribute("data-view")===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
-  document.getElementById("subtitle").textContent={hoy:"Tus hábitos de cada día.",semana:"Tu semana de un vistazo y el cierre.",evolucion:"Cómo van tus hábitos semana a semana.",mas:"Ajustes y copia de seguridad."}[view];
+  document.getElementById("title").textContent=view==="semana"?"La salud de mi semana":"La salud de mi día";document.title=document.getElementById("title").textContent;
+  document.getElementById("subtitle").textContent={hoy:"Al terminar el día, anotá cómo cuidaste tu salud.",semana:"Tu semana de un vistazo y el cierre.",evolucion:"Cómo van tus hábitos semana a semana.",mas:"Ajustes y copia de seguridad."}[view];
   if(view==="hoy")renderHoy();else if(view==="semana")renderSemana();else if(view==="evolucion")renderEvolucion();else renderMas();
   main.scrollTop=0;
 }
