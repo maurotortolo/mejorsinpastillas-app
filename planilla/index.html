@@ -143,7 +143,7 @@ var PILARES=[
    {id:"lev",label:"Me levanté",hint:"Hora",t:"time"},
    {id:"sue",label:"Calidad del sueño",hint:"1 a 10",t:"scale"},
    {id:"sol",label:"Exposición al sol",hint:"Minutos",t:"num",step:5,unit:"min"}]},
- {id:"sin",name:"Síntomas específicos",intro:"Elegí los síntomas que buscamos aliviar con el tratamiento (hasta cuatro) y puntuá cada día cuánto te molestaron: 1 es casi nada y 10, la máxima intensidad.",rows:[
+ {id:"sin",name:"Síntomas específicos",intro:"<b>No es para todas las personas.</b> Completalo solo si estás siguiendo algún síntoma con tu médico o querés ver si mejora con tus hábitos. Si no es tu caso, salteá esta parte.<br><br>Elegí hasta cuatro síntomas y puntuá cada día cuánto te molestaron: 1 es casi nada y 10, la máxima intensidad.",rows:[
    {id:"s1",label:"Síntoma 1",hint:"Puntuá de 1 a 10 (10 = máxima intensidad)",t:"scale",act:"sin"},
    {id:"s2",label:"Síntoma 2",hint:"Puntuá de 1 a 10 (10 = máxima intensidad)",t:"scale",act:"sin"},
    {id:"s3",label:"Síntoma 3",hint:"Puntuá de 1 a 10 (10 = máxima intensidad)",t:"scale",act:"sin"},
@@ -255,7 +255,9 @@ function renderHoy(){
   var d=curDay, m=monday(d);
   var h=notices();
   h+='<div class="daynav"><button id="prevDay" aria-label="Día anterior">‹</button><div class="lbl"><b>'+(d===today()?"Hoy":DIAS_L[dow(d)].replace(/^./,function(c){return c.toUpperCase();}))+'</b><span class="muted">'+DIAS_L[dow(d)]+" "+shortDate(d)+'</span></div><button id="nextDay" aria-label="Día siguiente"'+(d>=today()?" disabled":"")+'>›</button></div>';
-  PILARES.forEach(function(p){
+  /* Síntomas específicos va al final, debajo del peso: no todas las personas lo completan */
+  function pilarHTML(p){
+    var h='';
     h+='<section class="group"><h2>'+p.name+'</h2>'+(p.intro?'<p class="muted" style="margin:0 0 8px">'+p.intro+'</p>':'')+'<div class="rows">';
     p.rows.forEach(function(r){
       var v=dayQ(d)[r.id];
@@ -264,9 +266,12 @@ function renderHoy(){
       h+="</div>"+(r.act?actControl(r,d):"")+control(r,d)+"</div>";
     });
     h+="</div></section>";
-  });
+    return h;
+  }
+  PILARES.forEach(function(p){if(p.id!=="sin")h+=pilarHTML(p);});
   var wq=weekQ(m);
   h+='<section class="group"><h2>Una vez por semana</h2><div class="rows"><div class="row"><div class="name">Peso y cintura<small>En ayunas</small></div><div class="btnrow">'+WEEKLY.map(function(x){return '<div><label for="wk_'+x.id+'">'+x.label+" ("+x.unit+')</label><input type="number" inputmode="decimal" step="'+x.step+'" id="wk_'+x.id+'" data-week="'+x.id+'" value="'+(wq[x.id]==null?"":wq[x.id])+'"></div>';}).join("")+"</div></div></div></section>";
+  PILARES.forEach(function(p){if(p.id==="sin")h+=pilarHTML(p);});
   h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
   document.getElementById("prevDay").onclick=function(){curDay=addDays(curDay,-1);render();};
@@ -305,14 +310,16 @@ function renderSemana(){
   var days=[0,1,2,3,4,5,6].map(function(i){return addDays(m,i);});
   var h=(S.demo?notices():"")+'<div class="daynav"><button id="prevW" aria-label="Semana anterior">‹</button><div class="lbl"><b>Semana del '+shortDate(m)+'</b><span class="muted">al '+shortDate(addDays(m,6))+'</span></div><button id="nextW" aria-label="Semana siguiente"'+(m>=monday(today())?" disabled":"")+">›</button></div>";
   h+='<div class="tablewrap"><table class="week"><thead><tr><th>Hábito</th>'+days.map(function(d,i){return "<th>"+DIAS[i]+"<br>"+pd(d).getDate()+"</th>";}).join("")+"<th>Semana</th></tr></thead><tbody>";
-  PILARES.forEach(function(p){
+  function pilRows(p){
     h+='<tr class="pil"><td colspan="9">'+p.name+"</td></tr>";
     p.rows.forEach(function(r){
       var vals=days.map(function(d){return dayQ(d)[r.id];});var s=rowSummary(r,vals);
       h+='<tr><td>'+esc(r.act&&r.act!=="sin"?r.label:rname(r))+"</td>"+vals.map(function(v,i){return '<td class="'+(r.t==="check"&&v?"ok":"")+'">'+cellTxt(r,v,days[i])+"</td>";}).join("")+'<td class="sum">'+s.txt+"</td></tr>";
     });
-  });
+  }
+  PILARES.forEach(function(p){if(p.id!=="sin")pilRows(p);});
   h+='<tr class="pil"><td colspan="9">Una vez por semana</td></tr>'+WEEKLY.map(function(x){return "<tr><td>"+x.label+" ("+x.unit+')</td><td colspan="7"></td><td class="sum">'+(w[x.id]==null?"":String(w[x.id]).replace(".",","))+"</td></tr>";}).join("");
+  PILARES.forEach(function(p){if(p.id==="sin")pilRows(p);});
   h+="</tbody></table></div><p class=\"muted\" style=\"margin:0\">Tocá un día en la pestaña Mi día para completarlo o corregirlo. En la columna Semana ves el total (por ejemplo, 5/7) o el promedio.</p>";
   h+='<div class="card"><h3>Cierre de la semana</h3>'+[["ok","¿Qué me funcionó?"],["obs","¿Qué obstáculo apareció?"],["aj","¿Qué ajusto para la semana que viene?"]].map(function(q){return '<label for="c_'+q[0]+'" style="margin-top:8px">'+q[1]+'</label><textarea id="c_'+q[0]+'" data-cierre="'+q[0]+'" rows="2">'+esc(w[q[0]]||"")+"</textarea>";}).join("")+"</div>";
   main.innerHTML=h;
@@ -363,8 +370,8 @@ function renderEvolucion(){
   opts='<optgroup label="Entrenamiento (resumen)">'+Object.keys(SPECIAL).map(function(k){return '<option value="'+k+'"'+(k===evoRow?" selected":"")+">"+SPECIAL[k]+"</option>";}).join("")+"</optgroup>"+opts;
   var used={};Object.keys(S.d).forEach(function(d){SROWS.forEach(function(k){var a=S.d[d][k+"a"];if(a&&S.d[d][k]!=null)used[a]=1;});});SROWS.forEach(function(k){if(S.lastAct&&S.lastAct[k])used[S.lastAct[k]]=1;});
   var syms=SINT.filter(function(x){return used[x[0]];});
-  if(syms.length)opts+='<optgroup label="Síntomas específicos">'+syms.map(function(x){var v="sx_"+x[0];return '<option value="'+v+'"'+(v===evoRow?" selected":"")+">"+x[1]+"</option>";}).join("")+"</optgroup>";
   opts+='<optgroup label="Una vez por semana">'+WEEKLY.map(function(x){return '<option value="'+x.id+'"'+(x.id===evoRow?" selected":"")+">"+x.label+" ("+x.unit+")</option>";}).join("")+"</optgroup>";
+  if(syms.length)opts+='<optgroup label="Síntomas específicos">'+syms.map(function(x){var v="sx_"+x[0];return '<option value="'+v+'"'+(v===evoRow?" selected":"")+">"+x[1]+"</option>";}).join("")+"</optgroup>";
   var s=weeklySeries(evoRow);
   var pts=s.filter(function(p){return p.v!=null;});
   var sym=isSym(evoRow);
