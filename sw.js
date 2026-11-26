@@ -1,6 +1,6 @@
 /* Mejor sin pastillas · service worker. Al publicar una versión nueva, cambiar VERSION. Nunca toca los datos guardados (localStorage). */
-const VERSION = "msp-2026-11-25-3";
-const FILES = ["./", "./index.html", "./entrenamiento/", "./entrenamiento/index.html", "./fuerza/", "./fuerza/index.html", "./cardio/", "./cardio/index.html", "./planilla/", "./planilla/index.html", "./examenes/", "./examenes/index.html", "./manifest.webmanifest",
+const VERSION = "msp-2026-11-26-1";
+const FILES = ["./", "./index.html", "./entrenamiento/", "./entrenamiento/index.html", "./fuerza/", "./fuerza/index.html", "./cardio/", "./cardio/index.html", "./planilla/", "./planilla/index.html", "./presion/", "./presion/index.html", "./examenes/", "./examenes/index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
