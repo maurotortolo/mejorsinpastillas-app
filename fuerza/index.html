@@ -117,6 +117,29 @@ table.mes td:last-child,table.mes thead th:last-child{background:var(--mint)}
 .delta{flex:none;font-weight:700;font-size:17px;text-align:right;font-variant-numeric:tabular-nums}
 .delta small{display:block;font-size:13px;font-weight:400}
 .delta.up{color:var(--good)}.delta.down{color:var(--warn)}.delta.eq{color:var(--muted)}
+/* comparación con el mes anterior y observaciones */
+.cmphead{position:sticky;top:-18px;z-index:2;background:var(--card);display:grid;grid-template-columns:minmax(96px,34%) 1fr;gap:10px;padding:8px 0;border-bottom:2px solid var(--line);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.cmphead b{display:block;font-size:15px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.cmp{display:grid;grid-template-columns:minmax(96px,34%) 1fr;gap:10px;align-items:center}
+.prev{background:var(--sand);border-radius:10px;padding:6px 8px;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.prev small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.prev.none{font-weight:400;color:var(--muted);font-size:14px}
+.cmp .mrow{gap:5px}
+.cmp .mrow input{width:80px;font-size:17px;padding:10px 6px}
+.cmp .mrow input[data-f="n"]{width:54px}
+.dl{font-size:13px;font-weight:700;min-height:18px;margin-top:3px;font-variant-numeric:tabular-nums}
+.dl.up{color:var(--good)}.dl.down{color:var(--warn)}.dl.eq{color:var(--muted);font-weight:400}
+.pnote{background:var(--sand);border-left:4px solid var(--warn);border-radius:10px;padding:10px 12px;font-size:15px}
+.pnote b{display:block;font-size:13px;color:var(--warn);margin-bottom:2px}
+.obs textarea{margin-top:8px}
+table.mes td.dn{color:var(--warn);font-weight:700}
+.ndot{color:var(--warn);font-weight:700;text-decoration:none}
+.nlist{display:flex;flex-direction:column;gap:0}
+.nitem{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;width:100%}
+.nitem:first-child{border-top:0}
+.nitem b{flex:none;min-width:58px;color:var(--warn)}
+.nitem span{white-space:pre-wrap}
+td .nt{display:block;font-size:13px;color:var(--warn);white-space:pre-wrap;margin-top:2px}
 </style>
 </head>
 <body>
@@ -171,16 +194,17 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp
 function demo(){
   var logs=[],id=1;
   function add(ex,daysAgo,kg,n){logs.push({id:id++,ex:ex,date:shiftDate(-daysAgo),kg:kg,n:n});}
-  var plan={pm:[50,55,60,62.5],sq:[40,45,50,52.5],pp:[30,32.5,35,37.5],remo:[20,22,24,26],dom:[0,0,2.5,5],gr:[16,18,20,22]};
+  var plan={pm:[50,55,52.5,62.5],sq:[40,45,42.5,52.5],pp:[30,32.5,35,37.5],remo:[20,22,24,26],dom:[0,0,2.5,5],gr:[16,18,16,22]};
   var reps={pm:8,sq:8,pp:8,remo:10,dom:5,gr:40};
   Object.keys(plan).forEach(function(ex){plan[ex].forEach(function(kg,i){add(ex,(3-i)*30+3,kg,reps[ex]+(i===3?1:0));});});
-  return {v:1,demo:true,prof:"",plazo:"6",names:{remo:"a un brazo",pm2:"",sq2:""},logs:logs,nextId:id,
+  var notes={};notes[monthKey(shiftDate(-33))]="Esguince de tobillo izquierdo a mitad de mes. Faltó dos semanas y bajamos la carga en piernas.";notes[monthKey(shiftDate(-3))]="Volvió a entrenar completo, sin dolor.";
+  return {v:1,demo:true,prof:"",plazo:"6",names:{remo:"a un brazo",pm2:"",sq2:""},logs:logs,nextId:id,notes:notes,
     goals:{tp:{ex:"pm",kg:80,n:8},ep:{ex:"sq",kg:70,n:8},eb:{ex:"pp",kg:45,n:8},tb:{ex:"remo",kg:30,n:10}}};
 }
-function blank(){return {v:1,demo:false,prof:"",plazo:"",names:{remo:"",pm2:"",sq2:""},logs:[],nextId:1,goals:{}};}
+function blank(){return {v:1,demo:false,prof:"",plazo:"",names:{remo:"",pm2:"",sq2:""},logs:[],nextId:1,goals:{},notes:{}};}
 var S;
 var APP_SCHEMA=1;
-function migrate(d){if(!d||typeof d!=="object")return blank();if(!d.v)d.v=1;/* futuras versiones: convertir aquí, nunca borrar campos */ if(!d.names)d.names={remo:"",pm2:"",sq2:""};if(!d.goals)d.goals={};if(!d.logs)d.logs=[];if(!d.nextId)d.nextId=d.logs.reduce(function(m,l){return Math.max(m,l.id+1);},1);return d;}
+function migrate(d){if(!d||typeof d!=="object")return blank();if(!d.v)d.v=1;/* futuras versiones: convertir aquí, nunca borrar campos */ if(!d.names)d.names={remo:"",pm2:"",sq2:""};if(!d.goals)d.goals={};if(!d.notes||typeof d.notes!=="object")d.notes={};if(!d.logs)d.logs=[];if(!d.nextId)d.nextId=d.logs.reduce(function(m,l){return Math.max(m,l.id+1);},1);return d;}
 try{var raw=localStorage.getItem(KEY);S=raw?migrate(JSON.parse(raw)):blank();}catch(e){S=blank();}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
 var storageOK=true;
@@ -223,25 +247,41 @@ function suggestedMonth(){var d=new Date();d.setDate(1);if(new Date().getDate()<
 function monthsBack(n){var r=[],d=new Date();d.setDate(1);for(var i=0;i<n;i++){r.push(mk(d));d.setMonth(d.getMonth()-1);}return r;}
 function bestIn(id,k){return best(logsOf(id).filter(function(l){return monthKey(l.date)===k;}));}
 function allExIds(){var r=[];PATTERNS.forEach(function(p){p.ex.forEach(function(id){r.push(id);});});return r;}
-function monthsShown(){var m={};S.logs.forEach(function(l){m[monthKey(l.date)]=1;});return Object.keys(m).sort().slice(-6);}
+function noteOf(k){return (S.notes&&S.notes[k])||"";}
+function monthsShown(){var m={};S.logs.forEach(function(l){m[monthKey(l.date)]=1;});Object.keys(S.notes||{}).forEach(function(k){if(noteOf(k))m[k]=1;});return Object.keys(m).sort().slice(-6);}
+function prevMonth(k){var p=k.split("-");return mk(new Date(+p[0],+p[1]-2,1));}
+/* Marca de referencia: la del mes anterior; si ese mes no hubo, la última registrada antes. */
+function refMark(id,k){var pk=prevMonth(k),b=bestIn(id,pk);if(b)return {k:pk,l:b};var mb=monthlyBest(id).filter(function(m){return m.k<k;});return mb.length?mb[mb.length-1]:null;}
+function deltaTxt(kg,n,ref,id){
+  if(kg==null||n==null||!ref)return {c:"",t:""};
+  var d=Math.round((kg-ref.kg)*10)/10,u=unit(id)==="m"?" m":" rep";
+  if(d>0)return {c:"up",t:"▲ +"+num(d)+" kg"};
+  if(d<0)return {c:"down",t:"▼ −"+num(-d)+" kg"};
+  var dn=n-ref.n;
+  if(dn>0)return {c:"up",t:"Mismos kg, +"+dn+u};
+  if(dn<0)return {c:"down",t:"Mismos kg, −"+(-dn)+u};
+  return {c:"eq",t:"Igual que antes"};
+}
 function shortMark(l,id){if(!l)return "—";var kg=l.kg?num(l.kg):(BASE_EX[id].bw?"PC":"0");return kg+" × "+l.n+(unit(id)==="m"?" m":"");}
 
 function renderMes(){
   var h=topNotices()+demoBanner();
-  var sm=suggestedMonth(), done=allExIds().some(function(id){return bestIn(id,sm);});
+  var sm=suggestedMonth(), done=!!noteOf(sm)||allExIds().some(function(id){return bestIn(id,sm);});
   h+='<button class="btn" id="fillMonth" style="padding:16px;font-size:19px">'+(done?"Revisar ":"Completar ")+monthFull(sm)+'</button>';
   var ms=monthsShown();
   if(!ms.length){
     h+='<div class="card"><h3>¿Cómo se usa?</h3><p class="muted" style="margin:0">Al final de cada mes, tocá el botón de arriba y anotá, para cada ejercicio, la carga más alta que usaste y cuántas repeticiones hiciste con ella. Si en algún ejercicio no entrenaste, dejalo en blanco. La app arma tu tabla y tus gráficos.</p></div>';
   } else {
-    h+='<div class="card" style="padding:0"><div class="tscroll"><table class="mes"><thead><tr><th scope="col"><span class="sr">Ejercicio</span></th>'+ms.map(function(k){return '<th scope="col"><button class="icon-btn" data-month="'+k+'" aria-label="Editar '+monthFull(k)+'">'+monthLabel(k)+"</button></th>";}).join("")+"</tr></thead><tbody>";
+    h+='<div class="card" style="padding:0"><div class="tscroll"><table class="mes"><thead><tr><th scope="col"><span class="sr">Ejercicio</span></th>'+ms.map(function(k){return '<th scope="col"><button class="icon-btn" data-month="'+k+'" aria-label="Editar '+monthFull(k)+'">'+monthLabel(k)+"</button>"+(noteOf(k)?'<span class="ndot" aria-label="con observaciones" title="Con observaciones"> ●</span>':"")+"</th>";}).join("")+"</tr></thead><tbody>";
     PATTERNS.forEach(function(p){
       var ids=p.ex.filter(function(id){return ms.some(function(k){return bestIn(id,k);});});
       if(!ids.length)return;
       h+='<tr class="grp"><th scope="rowgroup" colspan="'+(ms.length+1)+'">'+p.name+"</th></tr>";
-      ids.forEach(function(id){h+='<tr><th scope="row">'+esc(exName(id))+"</th>"+ms.map(function(k){return "<td>"+shortMark(bestIn(id,k),id)+"</td>";}).join("")+"</tr>";});
+      ids.forEach(function(id){h+='<tr><th scope="row">'+esc(exName(id))+"</th>"+ms.map(function(k,i){var c=bestIn(id,k),pv=i?bestIn(id,ms[i-1]):null,dn=c&&pv&&c.kg<pv.kg;return "<td"+(dn?' class="dn"':"")+">"+(dn?"▼ ":"")+shortMark(c,id)+"</td>";}).join("")+"</tr>";});
     });
-    h+='</tbody></table></div></div><p class="muted" style="margin:0">Carga máxima (kg) × repeticiones de cada mes. PC: solo con tu peso corporal. Tocá un mes para corregirlo; deslizá la tabla para ver meses anteriores.</p>';
+    h+='</tbody></table></div></div><p class="muted" style="margin:0">Carga máxima (kg) × repeticiones de cada mes. PC: solo con tu peso corporal. ▼ en naranja: bajó la carga respecto del mes anterior. ● meses con observaciones. Tocá un mes para corregirlo; deslizá la tabla para ver meses anteriores.</p>';
+    var nk=ms.filter(noteOf).reverse();
+    h+='<div class="card"><h3>Observaciones de cada mes</h3>'+(nk.length?'<div class="nlist">'+nk.map(function(k){return '<button class="nitem" data-month="'+k+'"><b>'+monthLabel(k)+"</b><span>"+esc(noteOf(k))+"</span></button>";}).join("")+"</div>":'<p class="muted" style="margin:0">Lesiones, faltas, viajes o cambios de plan. Ayudan a entender por qué un mes la carga bajó. Se cargan al completar cada mes.</p>')+"</div>";
     h+='<div class="card"><h3>Compartir con tu médico</h3><p class="muted" style="margin:0 0 10px">Se abre WhatsApp con tu tabla de los últimos meses, lista para enviar al Dr. Mauro Tortolo. Vos decidís si la mandás.</p><button class="btn sec" id="sendDoc">Enviar mi evolución por WhatsApp</button></div>';
   }
   h+='<footer>Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
@@ -253,25 +293,39 @@ function renderMes(){
 
 function openMonth(k){
   var opts=monthsBack(12);monthsShown().forEach(function(m){if(opts.indexOf(m)<0)opts.push(m);});opts.sort().reverse();
-  var prevK=(function(){var p=k.split("-"),d=new Date(+p[0],+p[1]-2,1);return mk(d);})();
+  var prevK=prevMonth(k);
   var h='<h3 id="sheetTitle">Tu mejor marca del mes</h3>';
   h+='<div><label for="mSel">Mes</label><select id="mSel">'+opts.map(function(m){return '<option value="'+m+'"'+(m===k?" selected":"")+">"+monthFull(m)+"</option>";}).join("")+"</select></div>";
-  h+='<div class="hint">Para cada ejercicio, anotá la carga más alta que usaste en el mes y cuántas repeticiones hiciste con ella. Dejá en blanco los que no hiciste.</div>';
+  h+='<div class="hint">Para cada ejercicio, anotá la carga más alta que usaste en el mes y cuántas repeticiones hiciste con ella. A la izquierda ves la marca del mes anterior para comparar. Dejá en blanco los que no hiciste.</div>';
+  if(noteOf(prevK))h+='<div class="pnote"><b>Observaciones de '+monthFull(prevK)+'</b>'+esc(noteOf(prevK))+"</div>";
+  h+='<div class="cmphead"><span>Mes anterior<b>'+monthLabel(prevK)+'</b></span><span>Este mes<b>'+monthLabel(k)+"</b></span></div>";
   PATTERNS.forEach(function(p){
     h+='<div class="mgrp"><h4>'+p.name+"</h4>";
     p.ex.forEach(function(id){
-      var cur=bestIn(id,k), pv=bestIn(id,prevK), u=unit(id);
+      var cur=bestIn(id,k), ref=refMark(id,k), u=unit(id);
       h+='<div class="mex" data-ex="'+id+'"><div class="mname">'+esc(exName(id))+"</div>";
       if(BASE_EX[id].variant)h+='<input type="text" data-f="var" value="'+esc(S.names[id]||"")+'" placeholder="'+(id==="remo"?"Variante de remo (opcional)":id==="pm2"?"¿Cuál? Por ejemplo, peso muerto rumano":"¿Cuál? Por ejemplo, sentadilla búlgara")+'" aria-label="Variante de '+esc(exName(id))+'" style="margin-bottom:6px">';
-      h+='<div class="mrow"><input type="number" inputmode="decimal" step="0.5" min="0" data-f="kg" value="'+(cur?cur.kg:"")+'" aria-label="Kilos en '+esc(exName(id))+'"><span>kg'+(BASE_EX[id].bw?" extra":"")+' ×</span><input type="number" inputmode="numeric" min="1" data-f="n" value="'+(cur?cur.n:"")+'" aria-label="'+(u==="m"?"Metros":"Repeticiones")+" en "+esc(exName(id))+'"><span>'+(u==="m"?"metros":"rep")+"</span></div>";
-      if(pv)h+='<div class="muted" style="font-size:13px;margin-top:2px">'+monthLabel(prevK)+": "+markTxt(pv,id)+"</div>";
+      var prevHtml=ref?'<div class="prev">'+shortMark(ref.l,id)+(u==="m"?"":" rep")+(ref.k!==prevK?"<small>último: "+monthLabel(ref.k)+"</small>":"")+"</div>":'<div class="prev none">Sin registro</div>';
+      var dt=cur?deltaTxt(cur.kg,cur.n,ref&&ref.l,id):{c:"",t:""};
+      h+='<div class="cmp">'+prevHtml+'<div><div class="mrow"><input type="number" inputmode="decimal" step="0.5" min="0" data-f="kg" value="'+(cur?cur.kg:"")+'" aria-label="Kilos en '+esc(exName(id))+" en "+monthFull(k)+'"><span>kg ×</span><input type="number" inputmode="numeric" min="1" data-f="n" value="'+(cur?cur.n:"")+'" aria-label="'+(u==="m"?"Metros":"Repeticiones")+" en "+esc(exName(id))+'"><span>'+(u==="m"?"m":"rep")+'</span></div><div class="dl '+dt.c+'" aria-live="polite">'+dt.t+"</div></div></div>";
       h+="</div>";
     });
     h+="</div>";
   });
+  var chips=["Lesión","Dolor","Faltó a entrenar","Enfermedad","Viaje o vacaciones","Cambio de plan"];
+  h+='<div class="obs"><label for="mObs" style="font-size:16px;color:var(--ink);font-weight:700">Observaciones de '+monthFull(k)+'</label><div class="muted" style="margin-bottom:8px">Anotá lo que ayude a entender el mes: una lesión, faltas y por qué, un viaje o un cambio de plan.</div><div class="quick">'+chips.map(function(c){return '<button type="button" data-chip="'+c+'">'+c+"</button>";}).join("")+'</div><textarea id="mObs" rows="3" placeholder="Por ejemplo: dolor de hombro derecho desde la 2.ª semana; no hizo press.">'+esc(noteOf(k))+"</textarea></div>";
   h+='<div class="row"><button class="btn ghost" id="mCancel">Cancelar</button><button class="btn" id="mSave">Guardar</button></div>';
   sheet.innerHTML=h;sheetBg.classList.add("open");sheet.scrollTop=0;
   document.getElementById("mSel").onchange=function(e){openMonth(e.target.value);};
+  sheet.querySelectorAll("[data-chip]").forEach(function(b){b.onclick=function(){var t=document.getElementById("mObs"),v=t.value.replace(/\s+$/,"");t.value=(v?v+(/[.;:]$/.test(v)?" ":". "):"")+b.getAttribute("data-chip")+": ";t.focus();try{t.setSelectionRange(t.value.length,t.value.length);}catch(e){}};});
+  sheet.querySelectorAll(".mex").forEach(function(r){
+    var id=r.getAttribute("data-ex"),ref=refMark(id,k),dl=r.querySelector(".dl");
+    r.querySelectorAll('[data-f="kg"],[data-f="n"]').forEach(function(inp){inp.oninput=function(){
+      var kv=r.querySelector('[data-f="kg"]').value.trim(),nv=r.querySelector('[data-f="n"]').value.trim();
+      var d=deltaTxt(kv===""?null:parseFloat(kv.replace(",",".")),nv===""?null:parseInt(nv,10),ref&&ref.l,id);
+      if(d.t&&(isNaN(parseFloat(kv.replace(",",".")))||isNaN(parseInt(nv,10))))d={c:"",t:""};
+      dl.className="dl "+d.c;dl.textContent=d.t;};});
+  });
   document.getElementById("mCancel").onclick=closeSheet;
   document.getElementById("mSave").onclick=function(){
     var rows=[],bad=null;
@@ -282,7 +336,9 @@ function openMonth(k){
       rows.push({id:id,kg:kg,n:n,vn:vn?vn.value.trim():null});
     });
     if(bad){toast("Revisá "+bad+": completá los kilos y "+(bad.indexOf("granjero")>=0?"los metros":"las repeticiones"));return;}
-    if(S.demo&&rows.some(function(r){return r.kg!=null;})){var nm=S.names;S=blank();S.names=nm;}
+    var obs=document.getElementById("mObs").value.trim().replace(/:$/,"").trim();
+    if(S.demo&&(obs||rows.some(function(r){return r.kg!=null;}))){var nm=S.names;S=blank();S.names=nm;}
+    if(obs)S.notes[k]=obs;else delete S.notes[k];
     rows.forEach(function(r){
       if(r.vn!=null)S.names[r.id]=r.vn;
       var cur=bestIn(r.id,k);
@@ -313,6 +369,8 @@ function sendDoc(){
       var cells=ms.map(function(k){var b=bestIn(id,k);return b?monthLabel(k)+" "+shortMark(b,id):null;}).filter(Boolean);
       if(cells.length)L.push("*"+exName(id)+"*: "+cells.join(" · "));
     });
+    var nk=ms.filter(noteOf);
+    if(nk.length){L.push("","*Observaciones*");nk.forEach(function(k){L.push(monthLabel(k)+": "+noteOf(k));});}
     location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(L.join("\n"));
   });
 }
@@ -334,7 +392,7 @@ function chartSVG(id){
   for(var v=mn;v<=mx+1e-9;v+=step){g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+num(v)+'</text>';}
   var pts=mb.map(function(m,i){return x(i)+","+y(m.l.kg);}).join(" ");
   var area="M"+x(0)+","+y(mn)+" L"+pts.split(" ").join(" L")+" L"+x(mb.length-1)+","+y(mn)+" Z";
-  var dots=mb.map(function(m,i){var last=i===mb.length-1;return '<circle cx="'+x(i)+'" cy="'+y(m.l.kg)+'" r="'+(last?5:3.5)+'" fill="'+(last?"var(--green)":"var(--card)")+'" stroke="var(--green)" stroke-width="2"/><text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+monthLabel(m.k)+"</text>";}).join("");
+  var dots=mb.map(function(m,i){var last=i===mb.length-1;return '<circle cx="'+x(i)+'" cy="'+y(m.l.kg)+'" r="'+(last?5:3.5)+'" fill="'+(last?"var(--green)":"var(--card)")+'" stroke="var(--green)" stroke-width="2"/><text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" '+(noteOf(m.k)?'fill="var(--warn)" font-weight="700">● ':'fill="var(--muted)">')+monthLabel(m.k)+"</text>";}).join("");
   var lastM=mb[mb.length-1];
   var lbls=mb.map(function(m,i){return i===mb.length-1?"":'<text x="'+x(i)+'" y="'+(y(m.l.kg)-9)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+num(m.l.kg)+"×"+m.l.n+"</text>";}).join("");
   var lbl=lbls+'<text x="'+Math.min(x(mb.length-1),W-pr-2)+'" y="'+(y(lastM.l.kg)-10)+'" text-anchor="end" font-size="12" font-weight="700" fill="var(--green)">'+num(lastM.l.kg)+" kg × "+lastM.l.n+'</text>';
@@ -358,9 +416,9 @@ function renderProgreso(){
   var mb=monthlyBest(progEx);
   h+='<div class="card"><label for="exSel">Ejercicio</label><select id="exSel" style="margin-bottom:12px">'+opts+"</select>";
   h+='<h3>Carga máxima de cada mes</h3>'+chartSVG(progEx);
-  if(mb.length){h+='<table style="margin-top:8px"><thead><tr><th>Mes</th><th>Mejor marca</th><th></th></tr></thead><tbody>'+mb.slice().reverse().map(function(m){return "<tr><td>"+monthLabel(m.k)+"</td><td>"+markTxt(m.l,progEx)+'</td><td class="del"><button class="icon-btn" data-delm="'+progEx+"|"+m.k+'">Borrar</button></td></tr>';}).join("")+"</tbody></table>";}
+  if(mb.length){h+='<table style="margin-top:8px"><thead><tr><th>Mes</th><th>Mejor marca</th><th></th></tr></thead><tbody>'+mb.slice().reverse().map(function(m){return "<tr><td style=\"white-space:nowrap;vertical-align:top\">"+monthLabel(m.k)+"</td><td>"+markTxt(m.l,progEx)+(noteOf(m.k)?'<span class="nt">'+esc(noteOf(m.k))+"</span>":"")+'</td><td class="del"><button class="icon-btn" data-delm="'+progEx+"|"+m.k+'">Borrar</button></td></tr>';}).join("")+"</tbody></table>";}
   else h+='<p class="muted">Todavía no hay marcas de este ejercicio.</p>';
-  h+='<p class="muted" style="margin:10px 0 0">Si un mes subís la carga, es normal que bajen un poco las repeticiones. Lo importante es la tendencia a lo largo de los meses.</p></div>';
+  h+='<p class="muted" style="margin:10px 0 0">Si un mes subís la carga, es normal que bajen un poco las repeticiones. Lo importante es la tendencia a lo largo de los meses. Los meses marcados con ● en naranja tienen observaciones (lesión, faltas, viajes) que pueden explicar un retroceso.</p></div>';
   main.innerHTML=h;
   document.getElementById("exSel").onchange=function(e){progEx=e.target.value;render();};
 }
