@@ -138,10 +138,10 @@ var PILARES=[
    {id:"m2",label:"Mental 2",t:"check",act:"men"},
    {id:"m3",label:"Mental 3",t:"check",act:"men"}]},
  {id:"nat",name:"Conexión natural",rows:[
-   {id:"apag",label:"Apagado de pantallas",hint:"Hora",t:"time",late:true},
-   {id:"acos",label:"Me acosté",hint:"Hora",t:"time",late:true},
-   {id:"lev",label:"Me levanté",hint:"Hora",t:"time"},
-   {id:"sue",label:"Calidad del sueño",hint:"1 a 10",t:"scale"},
+   {id:"apag",label:"Apagado de pantallas",hint:"Hora · la noche anterior",t:"time",late:true},
+   {id:"acos",label:"Me acosté",hint:"Hora · la noche anterior",t:"time",late:true},
+   {id:"lev",label:"Me levanté",hint:"Hora · esta mañana",t:"time"},
+   {id:"sue",label:"Calidad del sueño",hint:"De la última noche · 1 a 10",t:"scale"},
    {id:"sol",label:"Exposición al sol",hint:"Minutos",t:"num",step:5,unit:"min"}]},
  {id:"sin",name:"Síntomas específicos",intro:"<b>No es para todas las personas.</b> Completalo solo si estás siguiendo algún síntoma con tu médico o querés ver si mejora con tus hábitos. Si no es tu caso, salteá esta parte.<br><br>Elegí hasta cuatro síntomas y puntuá cada día cuánto te molestaron: 1 es casi nada y 10, la máxima intensidad.",rows:[
    {id:"s1",label:"Síntoma 1",hint:"Puntuá de 1 a 10 (10 = máxima intensidad)",t:"scale",act:"sin"},
@@ -320,7 +320,7 @@ function renderSemana(){
   PILARES.forEach(function(p){if(p.id!=="sin")pilRows(p);});
   h+='<tr class="pil"><td colspan="9">Una vez por semana</td></tr>'+WEEKLY.map(function(x){return "<tr><td>"+x.label+" ("+x.unit+')</td><td colspan="7"></td><td class="sum">'+(w[x.id]==null?"":String(w[x.id]).replace(".",","))+"</td></tr>";}).join("");
   PILARES.forEach(function(p){if(p.id==="sin")pilRows(p);});
-  h+="</tbody></table></div><p class=\"muted\" style=\"margin:0\">Tocá un día en la pestaña Mi día para completarlo o corregirlo. En la columna Semana ves el total (por ejemplo, 5/7) o el promedio.</p>";
+  h+="</tbody></table></div><p class=\"muted\" style=\"margin:0\">Tocá un día en la pestaña Mi día para completarlo o corregirlo. En la columna Semana ves el total (por ejemplo, 5/7) o el promedio. El apagado de pantallas, la hora de acostarte y la calidad del sueño de cada día corresponden a la noche anterior.</p>";
   h+='<div class="card"><h3>Cierre de la semana</h3>'+[["ok","¿Qué me funcionó?"],["obs","¿Qué obstáculo apareció?"],["aj","¿Qué ajusto para la semana que viene?"]].map(function(q){return '<label for="c_'+q[0]+'" style="margin-top:8px">'+q[1]+'</label><textarea id="c_'+q[0]+'" data-cierre="'+q[0]+'" rows="2">'+esc(w[q[0]]||"")+"</textarea>";}).join("")+"</div>";
   main.innerHTML=h;
   document.getElementById("prevW").onclick=function(){curWeek=addDays(curWeek,-7);render();};
