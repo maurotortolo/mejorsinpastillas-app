@@ -182,6 +182,9 @@ function migrate(x){if(!x||typeof x!=="object")return blank();if(!x.v)x.v=1;if(!
 var S;
 try{var raw=localStorage.getItem(KEY);S=raw?migrate(JSON.parse(raw)):blank();}catch(e){S=blank();}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+var NKEY="msp_nombre";
+function getName(){try{return (localStorage.getItem(NKEY)||"").trim();}catch(e){return "";}}
+function setName(n){n=String(n||"").trim().slice(0,30);try{if(n)localStorage.setItem(NKEY,n);else localStorage.removeItem(NKEY);}catch(e){}return n;}
 var storageOK=true;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));storageOK=true;}catch(e){storageOK=false;toast("No se pudo guardar en este navegador");}}
 
@@ -226,6 +229,7 @@ function notices(){
   var h="";
   if(S.demo)return '<div class="banner"><div><b>Estás viendo un ejemplo</b> de seis semanas. Cuando anotes tu primer dato real, el ejemplo se borra solo.</div><div><button class="btn" id="exitDemo">Salir del ejemplo</button></div></div>';
   if(isIOS()&&!standalone()&&!S.hideIOS)h+='<div class="banner"><div><b>Instalala en tu iPhone.</b> Tocá Compartir en Safari y elegí <b>Agregar a pantalla de inicio</b>. Si no la instalás, el iPhone puede borrar tus registros cuando pasan unos días sin usarla.</div><div><button class="btn ghost" id="hideIOS">Entendido</button></div></div>';
+  if(!getName())h+='<div class="banner"><div><b>¿Cómo querés que te llame la app?</b> Escribí tu nombre o como te guste que te digan.</div><div class="btnrow"><input type="text" id="nameIn" maxlength="30" autocomplete="given-name" placeholder="Por ejemplo, Mariana" aria-label="Tu nombre"><button class="btn" id="saveName">Guardar</button></div></div>';
   var n=Object.keys(S.d).length;
   if(!n)h+='<div class="banner"><div><b>¡Bienvenido!</b> Anotá lo que hiciste hoy. No hace falta completar todo: empezá por lo que te resulte más fácil. ¿Querés ver cómo se ve tu registro después de unas semanas?</div><div><button class="btn ghost" id="seeDemo">Ver un ejemplo</button></div></div>';
   else if(n>=10){var lb=S.lastBackup?new Date(S.lastBackup):null;if(!lb||(Date.now()-lb.getTime())/864e5>30)h+='<div class="banner"><div><b>Hacé una copia de seguridad.</b> '+(lb?"Pasó más de un mes desde la última.":"Todavía no hiciste ninguna.")+' Te permite recuperar tus registros si cambiás de teléfono.</div><div><button class="btn" id="goBackup">Hacer copia ahora</button></div></div>';}
@@ -251,10 +255,11 @@ function actControl(r,d){
   if(cur==="otro")h+='<input type="text" data-acttxt="'+r.id+'" value="'+esc(txt)+'" placeholder="'+esc(OTRO_PH[r.act]||OTRO_PH.fis)+'" aria-label="Otra actividad">';
   return h;
 }
+function dayTitle(d){var nm=getName();return "¿Cómo fue tu "+(d===today()?"día hoy":d===addDays(today(),-1)?"día ayer":DIAS_L[dow(d)])+(nm?", "+nm:"")+"?";}
 function renderHoy(){
   var d=curDay, m=monday(d);
   var h=notices();
-  h+='<div class="daynav"><button id="prevDay" aria-label="Día anterior">‹</button><div class="lbl"><b>'+(d===today()?"Hoy":DIAS_L[dow(d)].replace(/^./,function(c){return c.toUpperCase();}))+'</b><span class="muted">'+DIAS_L[dow(d)]+" "+shortDate(d)+'</span></div><button id="nextDay" aria-label="Día siguiente"'+(d>=today()?" disabled":"")+'>›</button></div>';
+  h+='<div class="daynav"><button id="prevDay" aria-label="Día anterior">‹</button><div class="lbl"><b>'+esc(dayTitle(d))+'</b><span class="muted">'+DIAS_L[dow(d)]+" "+shortDate(d)+'</span></div><button id="nextDay" aria-label="Día siguiente"'+(d>=today()?" disabled":"")+'>›</button></div>';
   /* Síntomas específicos va al final, debajo del peso: no todas las personas lo completan */
   function pilarHTML(p){
     var h='';
@@ -389,20 +394,22 @@ function renderEvolucion(){
 /* ---------- MÁS ---------- */
 function renderMas(){
   var h='';
+  h+='<div class="card"><h3>Tu nombre</h3><p class="muted" style="margin:0 0 10px">Es el nombre con el que te llama la app. Podés cambiarlo cuando quieras.</p><div class="btnrow"><input type="text" id="nameEd" maxlength="30" autocomplete="given-name" value="'+esc(getName())+'" placeholder="Por ejemplo, Mariana" aria-label="Tu nombre"><button class="btn" id="saveNameEd">Guardar</button></div></div>';
   h+='<div class="card"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px">Tus registros se guardan solo en este teléfono. Una vez por mes, guardá una copia, por ejemplo mandándotela por WhatsApp o guardándola en Drive.</p><div class="btnrow"><button class="btn" id="bkFile">Guardar copia de seguridad</button></div><div class="btnrow" style="margin-top:8px"><button class="btn sec" id="bkCopy">Copiar como texto</button></div><label for="bkUp" style="margin-top:12px">Para recuperar tus datos, elegí el archivo de tu copia</label><input id="bkUp" type="file" accept=".json,application/json,text/plain"><label for="bkIn" style="margin-top:12px">O pegá acá la copia en texto</label><textarea id="bkIn" rows="3"></textarea><div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="bkLoad">Recuperar datos</button></div></div>';
   h+='<div class="card"><h3>Antes de empezar</h3><p class="muted" style="margin:0">Esta app es una ayuda para registrar tus hábitos y no reemplaza la indicación de tu médico. Si tomás medicación para la presión o la diabetes, no la modifiques por tu cuenta. Si tenés antecedentes de un trastorno de la conducta alimentaria, consultá con tu profesional antes de registrar peso, cintura o comidas.</p></div>';
   h+='<div class="card"><h3>Borrar todo</h3><p class="muted" style="margin:0 0 10px">Elimina todos tus registros diarios en este teléfono.</p><button class="btn ghost" id="wipe">Borrar todos mis datos</button></div><footer>Mejor sin pastillas · Dr. Mauro Tortolo · @mejorsinpastillas</footer>';
   main.innerHTML=h;
+  document.getElementById("saveNameEd").onclick=function(){var n=setName(document.getElementById("nameEd").value);toast(n?"Nombre guardado":"Nombre borrado");};
   function backupDone(){S.lastBackup=new Date().toISOString();save();}
   function restoreObj(d){d=migrate(d);confirmSheet("¿Reemplazar tus datos actuales por los de la copia de seguridad?","Recuperar",function(){S=d;S.demo=false;save();render();toast("Datos recuperados");});}
   document.getElementById("bkFile").onclick=function(){
-    var data=JSON.stringify({app:"msp-planilla",fecha:today(),datos:S}),name="mi-planilla-copia-"+today()+".json";
+    var data=JSON.stringify({app:"msp-planilla",fecha:today(),nombre:getName(),datos:S}),name="mi-planilla-copia-"+today()+".json";
     try{var file=new File([data],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de seguridad · La salud de mi día"}).then(function(){backupDone();toast("Copia guardada");},function(){});return;}}catch(e){}
     try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();backupDone();toast("Copia descargada");}catch(e){toast("No se pudo guardar el archivo. Probá con Copiar como texto.");}
   };
   document.getElementById("bkCopy").onclick=function(){var txt="MSPPLANILLA:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))));try{navigator.clipboard.writeText(txt).then(function(){backupDone();toast("Copia copiada: pegala en un chat o una nota");},function(){fb(txt);});}catch(e){fb(txt);}};
   function fb(txt){var b=document.getElementById("bkIn");b.value=txt;b.select();toast("Seleccioné la copia en el recuadro: copiala a mano");}
-  document.getElementById("bkUp").onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var o=JSON.parse(rd.result);var d=o.datos||o;if(!d.d)throw 0;restoreObj(d);}catch(err){toast("Ese archivo no es una copia válida de la planilla.");}};rd.readAsText(f);};
+  document.getElementById("bkUp").onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var o=JSON.parse(rd.result);var d=o.datos||o;if(!d.d)throw 0;if(o.nombre&&!getName())setName(o.nombre);restoreObj(d);}catch(err){toast("Ese archivo no es una copia válida de la planilla.");}};rd.readAsText(f);};
   document.getElementById("bkLoad").onclick=function(){var v=document.getElementById("bkIn").value.trim();try{if(v.indexOf("MSPPLANILLA:")!==0)throw 0;var d=JSON.parse(decodeURIComponent(escape(atob(v.slice(12)))));if(!d.d)throw 0;restoreObj(d);}catch(e){toast("Esa copia no es válida. Revisá que la hayas pegado completa.");}};
   document.getElementById("wipe").onclick=function(){confirmSheet("¿Seguro que querés borrar todos tus registros diarios? No se puede deshacer.","Borrar todo",function(){S=blank();save();render();toast("Datos borrados");});};
 }
@@ -421,11 +428,13 @@ main.addEventListener("click",function(e){
     setVal(curDay,id,same?null:v);rerender();return;}
   if((id=t.getAttribute("data-step"))){var inp=document.getElementById("in_"+id);var nv=Math.max(0,Math.round(((parseFloat(String(inp.value).replace(",","."))||0)+parseFloat(t.getAttribute("data-d")))*10)/10);setVal(curDay,id,nv);rerender();return;}
   if((id=t.getAttribute("data-clear"))){setVal(curDay,id,null);if(ROWS[id].act==="sin")setVal(curDay,id+"a",null);rerender();return;}
+  if(t.id==="saveName"){var ni=document.getElementById("nameIn");if(!ni.value.trim()){toast("Escribí tu nombre");ni.focus();return;}setName(ni.value);render();toast("¡Hola, "+getName()+"!");return;}
   if(t.id==="seeDemo"){S=demo();save();render();return;}
   if(t.id==="exitDemo"){S=blank();save();render();return;}
   if(t.id==="hideIOS"){S.hideIOS=true;save();render();return;}
   if(t.id==="goBackup"){view="mas";render();return;}
 });
+main.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="nameIn"){var b=document.getElementById("saveName");if(b)b.click();}});
 main.addEventListener("change",function(e){
   var t=e.target,id;
   if((id=t.getAttribute("data-act"))){if(S.demo)S=blank();S.lastAct[id]=t.value;if(dayQ(curDay)[id]===true||(ROWS[id].act==="sin"&&dayQ(curDay)[id]!=null))setVal(curDay,id+"a",t.value||null);else save();rerender();return;}
